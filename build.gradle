@@ -1,0 +1,17 @@
+group 'com.cmdcalendar.plugin'
+version '1.10.2-1.0.1-ALPHA'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sponge'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'org.spongepowered:spongeapi:5.0.0'
+}
