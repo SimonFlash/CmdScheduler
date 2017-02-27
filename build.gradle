@@ -1,5 +1,5 @@
 group 'com.cmdcalendar.plugin'
-version '1.10.2-1.2.1-ALPHA'
+version '1.10.2-1.1.0-ALPHA'
 
 apply plugin: 'java'
 

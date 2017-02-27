@@ -6,7 +6,6 @@ import com.mcsimonflash.sponge.cmdcalendar.RunTask;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class Tasks {
     private static List<CmdCalTask> taskList = Lists.newArrayList();
 
     public static List<CmdCalTask> getTaskList () {
-        Collections.sort(taskList, Comparator.comparing(CmdCalTask::getName));
+        taskList.sort(Comparator.comparing(CmdCalTask::getName));
         return taskList;
     }
 

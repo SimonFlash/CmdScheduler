@@ -13,7 +13,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 public class TaskList implements CommandExecutor {
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {;
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         if (Tasks.getTaskList().isEmpty()) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "No tasks exist!"));
             return CommandResult.empty();

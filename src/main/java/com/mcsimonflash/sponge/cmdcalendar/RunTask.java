@@ -17,7 +17,7 @@ import java.util.List;
 public class RunTask {
     private static List<Task> activeTasks = Lists.newArrayList();
 
-    public static void setupTasks() {
+    static void setupTasks() {
         CmdCalendar.getPlugin().getLogger().info("CmdCal: Setting up tasks...");
         if (!Config.isDisableRunTasksOnStartup()) {
             for (CmdCalTask cmdCalTask : Tasks.getTaskList()) {

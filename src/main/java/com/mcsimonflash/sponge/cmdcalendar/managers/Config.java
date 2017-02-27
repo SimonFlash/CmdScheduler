@@ -64,19 +64,19 @@ public class Config {
                 CmdCalendar.getPlugin().getLogger().error("CmdCal: Config contains duplicate tasks named " + taskName + "!");
                 addTask = false;
             }
-            int taskInterval = rootNode.getNode("Tasks", taskName, "Interval").getInt();
+            int taskInterval = rootNode.getNode("Tasks", taskName, "Interval").getInt(60);
             if (taskInterval < 1) {
                 CmdCalendar.getPlugin().getLogger().error("CmdCal: " + taskName + " interval is configured improperly!");
                 addTask = false;
             }
-            String taskCommand = rootNode.getNode("Tasks", taskName, "Command").getString();
+            String taskCommand = rootNode.getNode("Tasks", taskName, "Command").getString("");
             if (!Commands.testCommandNotBlacklisted(taskCommand)) {
                 CmdCalendar.getPlugin().getLogger().error("CmdCal: " + taskName + " command is blocked!");
                 addTask = false;
             }
             if (addTask) {
                 Tasks.addTask(taskName, taskInterval, taskCommand);
-                String taskDescription = rootNode.getNode("Tasks", taskName, "Description").getString();
+                String taskDescription = rootNode.getNode("Tasks", taskName, "Description").getString("");
                 Tasks.getTask(taskName).setDescription(taskDescription);
                 if (Config.isDisableRunTasksOnStartup()) {
                     boolean taskStatus = rootNode.getNode("Tasks", taskName, "Status").getBoolean(false);

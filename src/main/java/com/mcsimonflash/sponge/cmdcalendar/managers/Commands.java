@@ -5,10 +5,7 @@ import org.spongepowered.api.command.CommandSource;
 
 public class Commands {
     public static boolean testCommandExists(String taskCommand) {
-        if (Sponge.getCommandManager().get(taskCommand).isPresent()) {
-            return true;
-        }
-        return false;
+        return Sponge.getCommandManager().get(taskCommand).isPresent();
     }
 
     public static boolean testCommandNotBlacklisted(String taskCommand) {
@@ -37,9 +34,6 @@ public class Commands {
     }
 
     public static boolean testCommandPermission(CommandSource src, String taskCommand) {
-        if (Sponge.getCommandManager().get(taskCommand).get().getCallable().testPermission(src)) {
-            return true;
-        }
-        return false;
+        return Sponge.getCommandManager().get(taskCommand).get().getCallable().testPermission(src);
     }
 }
