@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.1.1-ALPHA", description = "Automatic Command Scheduler [WIP Alpha] - Developed by Simon_Flash")
+@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.2.1-ALPHA", description = "Automatic Command Scheduler [WIP Alpha] - Developed by Simon_Flash")
 public class CmdCalendar {
     private static CmdCalendar plugin;
     public static CmdCalendar getPlugin() {
