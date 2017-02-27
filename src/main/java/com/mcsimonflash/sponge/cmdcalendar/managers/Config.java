@@ -103,7 +103,7 @@ public class Config {
 
     public static boolean writeConfig() {
         rootNode.getNode("Settings", "timeUnit").setValue(("" + timeUnit).replaceFirst("TimeUnit.", ""));
-        rootNode.getNode("Settings", "ignoreBlacklist").setValue(ignoreBlacklistCheck);
+        rootNode.getNode("Settings", "ignoreBlacklistCheck").setValue(ignoreBlacklistCheck);
         rootNode.getNode("Settings", "ignorePermissionCheck").setValue(ignorePermissionCheck);
         rootNode.getNode("Settings", "disableRunTasksOnStartup").setValue(disableRunTasksOnStartup);
 
