@@ -26,46 +26,31 @@ import java.util.Map;
 @Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.0.1-ALPHA", description = "Command Scheduler")
 public class CmdCalendar {
     private static CmdCalendar plugin;
-    public static CmdCalendar getPlugin() {
+    static CmdCalendar getPlugin() {
         return plugin;
     }
 
     @Inject
     private Logger logger;
-
-    public Logger getLogger() {
+    Logger getLogger() {
         return logger;
     }
 
     @Inject
     @DefaultConfig(sharedRoot = true)
     private Path defaultConfig;
-
-    public Path getDefaultConfig() {
+    Path getDefaultConfig() {
         return defaultConfig;
-    }
-
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> configManager;
-
-    @Inject
-    @ConfigDir(sharedRoot = false)
-    private Path configDir;
-    public Path getConfigDir() {
-        return configDir;
     }
 
     @Listener
     public void onInitilization(GameInitializationEvent event) {
         plugin = this;
-
         CmdCalendar.getPlugin().getLogger().info("Initializing task resources...");
 
         Map<String, String> map_Config = new HashMap<>();
         map_Config.put("Save", "taskSave");
         map_Config.put("Load", "taskLoad");
-
         CommandSpec cmdSpec_Config = CommandSpec.builder()
                 .arguments(
                         GenericArguments.onlyOne(GenericArguments.choices(Text.of("parameter"), map_Config)),
@@ -171,7 +156,6 @@ public class CmdCalendar {
         map_EditTask.put("Interval", "taskInterval");
         map_EditTask.put("Description", "taskDescription");
         map_EditTask.put("Command", "taskCommand");
-
         CommandSpec cmdSpec_EditTask = CommandSpec.builder()
                 .description(Text.of("Changes the variable of a task"))
                 .child(cmdSpec_SetCommand, "SetCommand", "Command", "SetCmd", "Cmd", "sc")
