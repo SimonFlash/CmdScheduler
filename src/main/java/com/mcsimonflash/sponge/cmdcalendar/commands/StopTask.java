@@ -15,13 +15,13 @@ public class StopTask implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         String taskName = args.<String>getOne("taskName").get();
 
-        if (Tasks.verifyTask(taskName)) {
-            Tasks.stopTask(taskName);
-            src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " Disabled."));
-        } else {
+        if (!Tasks.verifyTask(taskName)) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist!"));
+            return CommandResult.empty();
+        } else {
+            Tasks.stopTask(Tasks.getTask(taskName));
+            src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " Disabled."));
+            return CommandResult.success();
         }
-
-        return CommandResult.success();
     }
 }

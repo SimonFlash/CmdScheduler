@@ -15,10 +15,11 @@ public class DeleteTask implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         String taskName = args.<String>getOne("taskName").get();
 
-        if (Tasks.removeTask(taskName)) {
-            src.sendMessage(Text.of(TextColors.DARK_GREEN, taskName, TextColors.GREEN, " removed from tasklist."));
-        } else {
+        if (!Tasks.verifyTask(taskName)) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist!"));
+        } else {
+            Tasks.removeTask(Tasks.getTask(taskName));
+            src.sendMessage(Text.of(TextColors.DARK_GREEN, taskName, TextColors.GREEN, " successfully removed from tasklist!"));
         }
 
         return CommandResult.success();

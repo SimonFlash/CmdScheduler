@@ -1,18 +1,26 @@
 package com.mcsimonflash.sponge.cmdcalendar.objects;
 
 public class CmdCalTask {
-    private String taskName;
-    private String taskDescription;
-    private String taskCommand;
-    private int taskInterval;
-    private boolean taskStatus;
 
-    public CmdCalTask(String taskName, int taskInterval, String taskCommand) {
+    public enum TaskType {
+        Scheduler,
+        GameTime,
+        Interval,
+        GameTick,
+        UNKNOWN,
+    }
+
+    private String taskName;
+    private TaskType taskType;
+
+    private String taskDescription = "";
+    private String taskCommand = "";
+    private boolean taskStatus = false;
+
+
+    public CmdCalTask(String taskName, TaskType taskType) {
         this.taskName = taskName;
-        this.taskInterval = taskInterval;
-        this.taskCommand = taskCommand;
-        this.taskDescription = "";
-        this.taskStatus = false;
+        this.taskType = taskType;
     }
 
     public String getName() {
@@ -39,14 +47,6 @@ public class CmdCalTask {
         this.taskCommand = taskCommand;
     }
 
-    public int getInterval() {
-        return taskInterval;
-    }
-
-    public void setInterval(int taskInterval) {
-        this.taskInterval = taskInterval;
-    }
-
     public boolean getStatus() {
         return taskStatus;
     }
@@ -54,4 +54,12 @@ public class CmdCalTask {
     public void setStatus(boolean taskStatus) {
         this.taskStatus = taskStatus;
     }
+
+    public TaskType getType() {
+        return taskType;
+    }
+
+    public void setType(TaskType taskType) {
+        this.taskType = taskType;
+    } //SFZ: Implement
 }

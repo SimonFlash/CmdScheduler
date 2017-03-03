@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 
 import com.mcsimonflash.sponge.cmdcalendar.RunTask;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
+import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskType;
+import com.mcsimonflash.sponge.cmdcalendar.objects.Interval;
+import com.mcsimonflash.sponge.cmdcalendar.objects.Scheduler;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -12,13 +15,9 @@ import java.util.List;
 public class Tasks {
     private static List<CmdCalTask> taskList = Lists.newArrayList();
 
-    public static List<CmdCalTask> getTaskList () {
+    public static List<CmdCalTask> getTaskList() {
         taskList.sort(Comparator.comparing(CmdCalTask::getName));
         return taskList;
-    }
-
-    public static void clearTaskList () {
-        taskList.clear();
     }
 
     public static boolean verifyTask(String taskName) {
@@ -40,85 +39,71 @@ public class Tasks {
         return null;
     }
 
-    public static void addTask(String taskName, int taskInterval, String taskCommand) {
-        taskList.add(new CmdCalTask(taskName, taskInterval, taskCommand));
+    public static TaskType parseType(String taskType) {
+        switch (taskType.toLowerCase()) {
+            case "scheduler":
+            case "sched":
+                return TaskType.Scheduler;
+            case "gametime":
+            case "gtime":
+                return TaskType.GameTime;
+            case "interval":
+            case "int":
+                return TaskType.Interval;
+            case "gametick":
+            case "gtick":
+                return TaskType.GameTime;
+            default:
+                return TaskType.UNKNOWN;
+        }
     }
 
-    public static boolean removeTask(String taskName) {
-        if (verifyTask(taskName)) {
-            for (int i = 0; i < taskList.size(); i++) {
-                if (taskList.get(i).getName().equalsIgnoreCase(taskName)) {
-                    taskList.remove(i);
-                    return true;
-                }
-            }
+    public static void addTask(String taskName, TaskType taskType) {
+        switch (taskType) {
+            case Scheduler:
+            case GameTime:
+                taskList.add(new Scheduler(taskName, taskType));
+                break;
+            case Interval:
+            case GameTick:
+                taskList.add(new Interval(taskName, taskType));
+                break;
+            case UNKNOWN:
+                taskList.add(new CmdCalTask(taskName, taskType));
         }
-        return false;
     }
 
-    public static boolean startTask(String taskName) {
-        if (verifyTask(taskName)) {
-            if (getTask(taskName).getCommand() != null) {
-                getTask(taskName).setStatus(true);
-                RunTask.addTask(getTask(taskName));
-                return true;
-            }
-        }
-        return false;
+    public static void removeTask(CmdCalTask cmdCalTask) {
+        taskList.remove(cmdCalTask);
     }
 
-    public static boolean stopTask(String taskName) {
-        if (verifyTask(taskName)) {
-            getTask(taskName).setStatus(false);
-            RunTask.delTask(getTask(taskName));
-            return true;
-        }
-        return false;
+    public static void startTask(CmdCalTask cmdCalTask) {
+        RunTask.addTask(cmdCalTask);
+        cmdCalTask.setStatus(true);
     }
 
-    public static boolean toggleTask(String taskName) {
-        if (verifyTask(taskName)) {
-            getTask(taskName).setStatus(!getTask(taskName).getStatus());
-            if (getTask(taskName).getStatus()) {
-                startTask(taskName);
-                return true;
-            } else {
-                stopTask(taskName);
-                return false;
-            }
-        }
-        return false;
+    public static void stopTask(CmdCalTask cmdCalTask) {
+        RunTask.delTask(cmdCalTask);
+        cmdCalTask.setStatus(false);
     }
 
-    public static boolean setTaskName(String oldTaskName, String newTaskName) {
-        if (verifyTask(oldTaskName) && !verifyTask(newTaskName)) {
-            getTask(oldTaskName).setName(newTaskName);
-            return true;
-        }
-        return false;
+    public static void setTaskName(CmdCalTask cmdCalTask, String taskName) {
+        cmdCalTask.setName(taskName);
     }
 
-    public static boolean setTaskInterval(String taskName, int taskInterval) {
-        if (verifyTask(taskName)) {
-            getTask(taskName).setInterval(taskInterval);
-            return true;
-        }
-        return false;
+    public static void setTaskDescription(CmdCalTask cmdCalTask, String taskDescription) {
+        cmdCalTask.setDescription(taskDescription);
     }
 
-    public static boolean setTaskDescription(String taskName, String taskDescription) {
-        if (verifyTask(taskName)) {
-            getTask(taskName).setDescription(taskDescription);
-            return true;
-        }
-        return false;
+    public static void setTaskCommand(CmdCalTask cmdCalTask, String taskCommand) {
+        cmdCalTask.setCommand(taskCommand);
     }
 
-    public static boolean setTaskCommand(String taskName, String taskCommand) {
-        if (verifyTask(taskName)) {
-            getTask(taskName).setCommand(taskCommand);
-            return true;
-        }
-        return false;
+    public static void setSchedule(Scheduler schedulerTask, String taskSchedule) {
+        schedulerTask.setSchedule(taskSchedule);
+    }
+
+    public static void setInterval(Interval intervalTask, int taskInterval) {
+        intervalTask.setInterval(taskInterval);
     }
 }

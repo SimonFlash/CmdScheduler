@@ -5,12 +5,16 @@ import org.spongepowered.api.command.CommandSource;
 
 public class Commands {
     public static boolean testCommandExists(String taskCommand) {
-        return Sponge.getCommandManager().get(taskCommand).isPresent();
+        return true; // Sponge.getCommandManager().get(taskCommand).isPresent(); SFZ: Implement
     }
 
-    public static boolean testCommandNotBlacklisted(String taskCommand) {
+    public static boolean testCommandPermission(CommandSource src, String taskCommand) {
+        return true; // Sponge.getCommandManager().get(taskCommand).get().getCallable().testPermission(src); SFZ: Implement
+    }
+
+    public static boolean testCommandBlacklisted(String taskCommand) {
         if (Config.isIgnoreBlacklistCheck()) {
-            return true;
+            return false;
         }
         String coreCommand;
         if (taskCommand.contains(" ")) {
@@ -28,12 +32,8 @@ public class Commands {
             case "stop":
             case "reload":
             case "op":
-                return false;
+                return true;
         }
-        return true;
-    }
-
-    public static boolean testCommandPermission(CommandSource src, String taskCommand) {
-        return Sponge.getCommandManager().get(taskCommand).get().getCallable().testPermission(src);
+        return false;
     }
 }

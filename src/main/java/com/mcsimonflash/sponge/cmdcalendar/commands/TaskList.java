@@ -19,15 +19,14 @@ public class TaskList implements CommandExecutor {
             return CommandResult.empty();
         } else {
             int c = 1;
-
             for (CmdCalTask task : Tasks.getTaskList()) {
                 if (task.getStatus()) {
-                    src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", TextColors.AQUA, task.getName(), " (", task.getInterval(), ") -> ", TextColors.GREEN, "Active"));
+                    src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", TextColors.AQUA, task.getName(), " [", task.getType(), "] -> ", TextColors.GREEN, "Active"));
                 } else {
-                    src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", TextColors.AQUA, task.getName(), " (", task.getInterval(), ") -> ", TextColors.RED, "Halted"));
+                    src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", TextColors.AQUA, task.getName(), " [", task.getType(), "] -> ", TextColors.RED, "Halted"));
                 }
             }
+            return CommandResult.success();
         }
-        return CommandResult.success();
     }
 }

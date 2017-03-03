@@ -4,8 +4,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import com.mcsimonflash.sponge.cmdcalendar.commands.*;
-
 import com.mcsimonflash.sponge.cmdcalendar.managers.Config;
+import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
+
 import org.slf4j.Logger;
 
 import org.spongepowered.api.Sponge;
@@ -18,10 +19,8 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
-@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.1.0-ALPHA", description = "Automatic Command Scheduler [WIP Alpha] - Developed by Simon_Flash")
+@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.0.0-BETA", description = "Automatic Command Scheduler [WIP Alpha] - Developed by Simon_Flash")
 public class CmdCalendar {
     private static CmdCalendar plugin;
     public static CmdCalendar getPlugin() {
@@ -44,14 +43,17 @@ public class CmdCalendar {
     @Listener
     public void onInitilization(GameInitializationEvent event) {
         plugin = this;
-        CmdCalendar.getPlugin().getLogger().info("Initializing task resources...");
+
+        getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
+        getLogger().info("|  CmdCalendar - Version 1.1.1-ALPHA  |");
+        getLogger().info("|      Developed by: Simon_Flash      |");
+        getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
 
         CommandSpec cmdSpec_CreateTask = CommandSpec.builder()
                 .description(Text.of("Adds a task to the task list"))
                 .arguments(
-                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
-                        GenericArguments.onlyOne(GenericArguments.integer(Text.of("taskInterval"))),
-                        GenericArguments.remainingJoinedStrings(Text.of("taskCommand")))
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskType"))),
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))))
                 .executor(new CreateTask())
                 .permission("cmdcalendar.tasks.create")
                 .build();
@@ -70,7 +72,7 @@ public class CmdCalendar {
                         GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
                         GenericArguments.remainingJoinedStrings(Text.of("taskCommand")))
                 .executor(new SetCommand())
-                .permission("cmdcalendar.tasks.edit.cmd")
+                .permission("cmdcalendar.tasks.edit.command")
                 .build();
 
         CommandSpec cmdSpec_SetDescription = CommandSpec.builder()
@@ -79,16 +81,16 @@ public class CmdCalendar {
                         GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
                         GenericArguments.remainingJoinedStrings(Text.of("taskDescription")))
                 .executor(new SetDescription())
-                .permission("cmdcalendar.tasks.edit.desc")
+                .permission("cmdcalendar.tasks.edit.description")
                 .build();
 
         CommandSpec cmdSpec_SetInterval = CommandSpec.builder()
-                .description(Text.of("Changes the description of a task (uses EditTask)"))
+                .description(Text.of("Changes the interval of an Interval task (uses EditTask)"))
                 .arguments(
                         GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
                         GenericArguments.onlyOne(GenericArguments.integer(Text.of("taskInterval"))))
                 .executor(new SetInterval())
-                .permission("cmdcalendar.tasks.edit.int")
+                .permission("cmdcalendar.tasks.edit.interval")
                 .build();
 
         CommandSpec cmdSpec_SetName = CommandSpec.builder()
@@ -98,6 +100,15 @@ public class CmdCalendar {
                         GenericArguments.onlyOne(GenericArguments.string(Text.of("newTaskName"))))
                 .executor(new SetName())
                 .permission("cmdcalendar.tasks.edit.name")
+                .build();
+
+        CommandSpec cmdSpec_SetSchedule = CommandSpec.builder()
+                .description(Text.of("Changes the schedule of a Scheduler task (uses EditTask)"))
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
+                        GenericArguments.remainingJoinedStrings(Text.of("taskSchedule")))
+                .executor(new SetSchedule())
+                .permission("cmdcalendar.tasks.edit.schedule")
                 .build();
 
         CommandSpec cmdSpec_ShowTask = CommandSpec.builder()
@@ -132,64 +143,42 @@ public class CmdCalendar {
                 .permission("cmdcalendar.syncconf")
                 .build();
 
-        CommandSpec cmdSpec_ToggleTask = CommandSpec.builder()
-                .description(Text.of("Changes the run state of a task"))
-                .arguments(
-                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))))
-                .executor(new ToggleTask())
-                .permission("cmdcalendar.run.toggle")
-                .build();
-
         CommandSpec cmdSpec_TaskList = CommandSpec.builder()
-                .description(Text.of("Shows basic info for all task"))
+                .description(Text.of("Shows basic info for all tasks"))
                 .executor(new TaskList())
                 .permission("cmdcalendar.view.list")
                 .build();
 
-        Map<String, String> map_EditTask = new HashMap<>();
-        map_EditTask.put("Name", "taskName");
-        map_EditTask.put("Interval", "taskInterval");
-        map_EditTask.put("Description", "taskDescription");
-        map_EditTask.put("Command", "taskCommand");
         CommandSpec cmdSpec_EditTask = CommandSpec.builder()
                 .description(Text.of("Changes the variable of a task"))
                 .child(cmdSpec_SetCommand, "SetCommand", "Command", "SetCmd", "Cmd", "sc")
                 .child(cmdSpec_SetDescription, "SetDescription", "Description", "SetDesc", "Desc", "sd")
                 .child(cmdSpec_SetInterval, "SetInterval", "Interval", "SetInt", "Int", "si")
                 .child(cmdSpec_SetName, "SetName", "Name", "sn")
-                .arguments(
-                        GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))),
-                        GenericArguments.onlyOne(GenericArguments.choices(Text.of("parameter"), map_EditTask)),
-                        GenericArguments.remainingJoinedStrings(Text.of("value")))
+                .child(cmdSpec_SetSchedule, "SetSchedule", "Schedule", "SetSched", "Sched", "ss")
                 .permission("cmdcalendar.edit")
                 .executor(new EditTask())
                 .build();
 
         CommandSpec cmdSpec_CmdCalendar = CommandSpec.builder()
                 .description(Text.of("Opens command reference menu (Use over /help CmdCalendar!)"))
-                .child(cmdSpec_SyncConfig, "SyncConfig")
+                .child(cmdSpec_SyncConfig, "SyncConfig", "Sync", "Config", "sc")
                 .child(cmdSpec_CreateTask, "CreateTask", "AddTask", "Create", "Add", "ct", "at")
-                .child(cmdSpec_DeleteTask, "DeleteTask", "RemoveTask", "DelTask", "Delete", "Remove", "Del", "dt", "rt")
+                .child(cmdSpec_DeleteTask, "DeleteTask", "RemoveTask", "Delete", "Remove", "dt", "rt")
                 .child(cmdSpec_EditTask, "EditTask", "Edit", "et")
                 .child(cmdSpec_ShowTask, "ShowTask", "Show", "st")
                 .child(cmdSpec_StartTask, "StartTask", "ActivateTask", "Start", "Activate", "on", "t+")
                 .child(cmdSpec_StopTask, "StopTask", "HaltTask", "Stop", "Halt", "off", "t-")
                 .child(cmdSpec_TaskList, "TaskList", "Tasks", "ListTask", "List", "tl", "lt")
-                .child(cmdSpec_ToggleTask, "ToggleTask", "Toggle", "tt")
-                .permission("cmdcalendar.use")
+                .permission("cmdcalendar")
                 .executor(new CmdCal())
                 .build();
+
         Sponge.getCommandManager().register(this, cmdSpec_CmdCalendar, Lists.newArrayList("cc", "CmdCal", "CmdCalendar", "CommandCalendar"));
 
-        getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
-        getLogger().info("|  CmdCalendar - Version 1.1.1-ALPHA  |");
-        getLogger().info("|                                     |");
-        getLogger().info("|      Developed by: Simon_Flash      |");
-        getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
-
         Config.readConfig();
-        RunTask.setupTasks();
-
-        getLogger().info("CmdCal: Initilization complete.");
+        if (!Tasks.getTaskList().isEmpty()) {
+            RunTask.setupTasks();
+        }
     }
 }
