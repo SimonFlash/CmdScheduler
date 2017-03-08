@@ -35,7 +35,7 @@ public class SetCommand implements CommandExecutor {
                     return CommandResult.empty();
                 }
 
-                Tasks.setTaskCommand(Tasks.getTask(taskName), taskCommand);
+                Tasks.getTask(taskName).setCommand(taskCommand);
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " command set!"));
                 return CommandResult.success();
             }

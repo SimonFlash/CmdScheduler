@@ -15,12 +15,13 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 import java.nio.file.Path;
 
-@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.0.0-BETA", description = "Automatic Command Scheduler [WIP Alpha] - Developed by Simon_Flash")
+@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "1.1.0-BETA", description = "Automatic Command Scheduler - Developed by Simon_Flash")
 public class CmdCalendar {
     private static CmdCalendar plugin;
     public static CmdCalendar getPlugin() {
@@ -45,7 +46,7 @@ public class CmdCalendar {
         plugin = this;
 
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
-        getLogger().info("|  CmdCalendar - Version 1.1.1-ALPHA  |");
+        getLogger().info("|  CmdCalendar - Version 1.1.0-BETA   |");
         getLogger().info("|      Developed by: Simon_Flash      |");
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
 
@@ -64,6 +65,30 @@ public class CmdCalendar {
                         GenericArguments.onlyOne(GenericArguments.string(Text.of("taskName"))))
                 .executor(new DeleteTask())
                 .permission("cmdcalendar.tasks.delete")
+                .build();
+
+        CommandSpec cmdSpec_ListConcealed = CommandSpec.builder()
+                .description(Text.of("Shows all concealed tasks"))
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("cmdConfirm"))))
+                .executor(new ListConcealed())
+                .permission("cmdcalendar.debug.listconcealed")
+                .build();
+
+        CommandSpec cmdSpec_LoadConfig = CommandSpec.builder()
+                .description(Text.of("Loads tasks from the config"))
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("cmdConfirm"))))
+                .executor(new LoadConfig())
+                .permission("cmdcalendar.debug.loadconfig")
+                .build();
+
+        CommandSpec cmdSpec_SaveConfig = CommandSpec.builder()
+                .description(Text.of("Saves tasks to the config"))
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("cmdConfirm"))))
+                .executor(new SaveConfig())
+                .permission("cmdcalendar.debug.saveconfig")
                 .build();
 
         CommandSpec cmdSpec_SetCommand = CommandSpec.builder()
@@ -127,6 +152,14 @@ public class CmdCalendar {
                 .permission("cmdcalendar.run.start")
                 .build();
 
+        CommandSpec cmdSpec_StopAll = CommandSpec.builder()
+                .description(Text.of("Stops all tasks"))
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.string(Text.of("cmdConfirm"))))
+                .executor(new StopAll())
+                .permission("cmdcalendar.debug.stopall")
+                .build();
+
         CommandSpec cmdSpec_StopTask = CommandSpec.builder()
                 .description(Text.of("Stops a task"))
                 .arguments(
@@ -135,18 +168,20 @@ public class CmdCalendar {
                 .permission("cmdcalendar.run.stop")
                 .build();
 
-        CommandSpec cmdSpec_SyncConfig = CommandSpec.builder()
-                .arguments(
-                        GenericArguments.onlyOne(GenericArguments.string(Text.of("parameter"))),
-                        GenericArguments.onlyOne(GenericArguments.string(Text.of("cmdConfirm"))))
-                .executor(new SyncConfig())
-                .permission("cmdcalendar.syncconf")
-                .build();
-
         CommandSpec cmdSpec_TaskList = CommandSpec.builder()
                 .description(Text.of("Shows basic info for all tasks"))
                 .executor(new TaskList())
                 .permission("cmdcalendar.view.list")
+                .build();
+
+        CommandSpec cmdSpec_Debug = CommandSpec.builder()
+                .description(Text.of("Accesses CmdCalendar debug commands"))
+                .child(cmdSpec_ListConcealed, "ListConcealed")
+                .child(cmdSpec_LoadConfig, "LoadConfig")
+                .child(cmdSpec_SaveConfig, "SaveConfig")
+                .child(cmdSpec_StopAll, "StopAll")
+                .permission("cmdcalendar.debug")
+                .executor(new EditTask())
                 .build();
 
         CommandSpec cmdSpec_EditTask = CommandSpec.builder()
@@ -162,7 +197,6 @@ public class CmdCalendar {
 
         CommandSpec cmdSpec_CmdCalendar = CommandSpec.builder()
                 .description(Text.of("Opens command reference menu (Use over /help CmdCalendar!)"))
-                .child(cmdSpec_SyncConfig, "SyncConfig", "Sync", "Config", "sc")
                 .child(cmdSpec_CreateTask, "CreateTask", "AddTask", "Create", "Add", "ct", "at")
                 .child(cmdSpec_DeleteTask, "DeleteTask", "RemoveTask", "Delete", "Remove", "dt", "rt")
                 .child(cmdSpec_EditTask, "EditTask", "Edit", "et")
@@ -180,5 +214,9 @@ public class CmdCalendar {
         if (!Tasks.getTaskList().isEmpty()) {
             RunTask.setupTasks();
         }
+    }
+
+    public void onStopping(GameStoppedServerEvent event) {
+        Config.writeConfig();
     }
 }

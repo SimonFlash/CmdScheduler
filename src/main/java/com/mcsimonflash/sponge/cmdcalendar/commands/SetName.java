@@ -30,7 +30,7 @@ public class SetName implements CommandExecutor {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Task names are case insensitive!"));
                     return CommandResult.empty();
                 } else {
-                    Tasks.setTaskName(cmdCalTask, newTaskName);
+                    cmdCalTask.setName(newTaskName);
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " name changed to ", newTaskName));
                     return CommandResult.success();
                 }

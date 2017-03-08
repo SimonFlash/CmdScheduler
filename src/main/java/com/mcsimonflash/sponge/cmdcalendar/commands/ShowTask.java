@@ -2,6 +2,7 @@ package com.mcsimonflash.sponge.cmdcalendar.commands;
 
 import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
+import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskStatus;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Interval;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Scheduler;
 
@@ -41,20 +42,27 @@ public class ShowTask implements CommandExecutor {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "Schedule: ", TextColors.RED, intervalTask.getInterval()));
                 }
             }
+
             if (cmdCalTask.getCommand().equals("")) {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Command: ", TextColors.AQUA, "No command set!"));
             } else {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Command: /", cmdCalTask.getCommand()));
             }
+
             if (cmdCalTask.getDescription().equals("")) {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Description: ", TextColors.AQUA, "No description set!"));
             } else {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Description: ", TextColors.AQUA, cmdCalTask.getDescription()));
             }
-            if (cmdCalTask.getStatus()) {
+
+            if (cmdCalTask.getStatus().equals(TaskStatus.Active)) {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.GREEN, "Active"));
-            } else {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.GOLD, "Halted"));
+            } else if (cmdCalTask.getStatus().equals(TaskStatus.Suspended)) {
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.YELLOW, "Suspended"));
+            } else if (cmdCalTask.getStatus().equals(TaskStatus.Halted)) {
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.RED, "Halted"));
+            } else if (cmdCalTask.getStatus().equals(TaskStatus.Concealed)) {
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.WHITE, "Concealed"));
             }
 
             return CommandResult.success();

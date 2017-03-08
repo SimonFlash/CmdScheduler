@@ -1,5 +1,5 @@
 group 'com.cmdcalendar.plugin'
-version '1.10.2-1.0.0-BETA'
+version '1.10.2-1.1.0-BETA'
 
 apply plugin: 'java'
 
@@ -12,6 +12,5 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'org.spongepowered:spongeapi:5.0.0'
 }

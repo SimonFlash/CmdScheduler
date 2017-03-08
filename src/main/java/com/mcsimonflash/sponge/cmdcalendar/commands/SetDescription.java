@@ -30,7 +30,7 @@ public class SetDescription implements CommandExecutor {
                     src.sendMessage(Text.of(TextColors.GOLD, "CmdCal WARNING: ", TextColors.YELLOW, "Task description is case insensitive from task name!"));
                 }
 
-                Tasks.setTaskDescription(cmdCalTask, taskDescription);
+                cmdCalTask.setDescription(taskDescription);
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " description sucessfully changed!"));
                 return CommandResult.success();
             }

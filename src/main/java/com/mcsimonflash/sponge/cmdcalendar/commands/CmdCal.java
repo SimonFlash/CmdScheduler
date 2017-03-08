@@ -27,24 +27,6 @@ public class CmdCal implements CommandExecutor {
                                 TextColors.DARK_AQUA, "Subcommands: ", TextColors.AQUA, "CreateTask, DeleteTask, EditTask, ShowTask, StartTask, StopTask, TaskList, ToggleTask\n")))
                         .build())
                 .build());
-        src.sendMessage(Text.builder("/CmdCal SyncConfig ")
-                .color(TextColors.DARK_AQUA)
-                .onClick(TextActions.suggestCommand("/CmdCal SyncConfig "))
-                .onHover(TextActions.showText(Text.of(
-                        TextColors.DARK_AQUA, "Config: ", TextColors.AQUA, "Used to save or load config changes\n",
-                        TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "Sync, Config, sc\n",
-                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.syncconfig")))
-                .append(Text.builder("<Subcommand> ")
-                        .color(TextColors.AQUA)
-                        .onHover(TextActions.showText(Text.of(
-                                TextColors.DARK_AQUA, "Subcommands: ", TextColors.AQUA, "Save, Load")))
-                        .build())
-                .append(Text.builder("Confirm")
-                        .color(TextColors.AQUA)
-                        .onHover(TextActions.showText(Text.of(
-                                TextColors.DARK_AQUA, "Confirm: ", TextColors.AQUA, "Confirms re-syncing the config")))
-                        .build())
-                .build());
         src.sendMessage(Text.builder("/CmdCal CreateTask ")
                 .color(TextColors.DARK_AQUA)
                 .onClick(TextActions.suggestCommand("/CmdCal CreateTask "))
@@ -148,6 +130,31 @@ public class CmdCal implements CommandExecutor {
                         TextColors.DARK_AQUA, "TaskList: ", TextColors.AQUA, "Shows basic information about all tasks\n",
                         TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "TaskList, ListTasks, Tasks, List, tl, lt\n",
                         TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.view.list")))
+                .append(Text.builder("<Status>")
+                        .color(TextColors.AQUA)
+                        .onHover(TextActions.showText(Text.of(
+                                TextColors.DARK_AQUA, "Task Status: ", TextColors.AQUA, "Optional status modifier [Active, Halted, Suspended, Concealed]")))
+                        .build())
+                .build());
+        src.sendMessage(Text.builder("/CmdCal Debug ")
+                .color(TextColors.DARK_AQUA)
+                .onClick(TextActions.suggestCommand("/CmdCal Debug "))
+                .onHover(TextActions.showText(Text.of(
+                        TextColors.DARK_AQUA, "TaskList: ", TextColors.AQUA, "Accesses CmdCalendar debug commands\n",
+                        TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "Debug, db\n",
+                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.debug")))
+                .append(Text.builder("<Subcommand>")
+                        .color(TextColors.AQUA)
+                        .onHover(TextActions.showText(Text.of(
+                                TextColors.DARK_AQUA, "Subcommand: ", TextColors.AQUA, "Subcommand to be called [ListConcealed, LoadConfig, SaveConfig, StopAll]\n",
+                                TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "Debug commands do not have aliases.\n",
+                                TextColors.DARK_AQUA, "Permissions: ", TextColors.AQUA, "cmdcalendar.debug.listconcealed, cmdcalendar.debug.loadconfig, cmdcalendar.debug.saveconfig, cmdcaledar.debug.stopall")))
+                        .build())
+                .append(Text.builder("Confirm")
+                        .color(TextColors.AQUA)
+                        .onHover(TextActions.showText(Text.of(
+                                TextColors.DARK_AQUA, "Confirm: ", TextColors.AQUA, "Confirms sending a debug command")))
+                        .build())
                 .build());
 
         return CommandResult.success();

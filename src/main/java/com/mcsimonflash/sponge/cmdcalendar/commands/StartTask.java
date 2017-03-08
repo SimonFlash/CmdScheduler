@@ -42,7 +42,7 @@ public class StartTask implements CommandExecutor {
                     }
                 }
 
-                RunTask.addTask(cmdCalTask);
+                Tasks.startTask(cmdCalTask);
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " Enabled."));
                 return CommandResult.success();
             }

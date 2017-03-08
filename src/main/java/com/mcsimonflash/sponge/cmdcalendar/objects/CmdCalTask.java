@@ -10,17 +10,50 @@ public class CmdCalTask {
         UNKNOWN,
     }
 
+    public enum TaskStatus {
+        Active,
+        Suspended,
+        Halted,
+        Concealed,
+    }
+
     private String taskName;
     private TaskType taskType;
 
     private String taskDescription = "";
     private String taskCommand = "";
-    private boolean taskStatus = false;
+    private TaskStatus taskStatus = TaskStatus.Halted;
 
 
     public CmdCalTask(String taskName, TaskType taskType) {
         this.taskName = taskName;
         this.taskType = taskType;
+    }
+
+    public static TaskStatus parseStatus (String taskStatus) {
+        switch (taskStatus.toLowerCase()) {
+            case "active":
+                return TaskStatus.Active;
+            case "suspended":
+                return TaskStatus.Suspended;
+            case "halted":
+                return TaskStatus.Halted;
+            default:
+                return TaskStatus.Concealed;
+        }
+    }
+
+    public static TaskType parseType(String taskType) {
+        switch (taskType.toLowerCase()) {
+            case "scheduler":
+            case "sched":
+                return TaskType.Scheduler;
+            case "interval":
+            case "inter":
+                return TaskType.Interval;
+            default:
+                return TaskType.UNKNOWN;
+        }
     }
 
     public String getName() {
@@ -47,11 +80,11 @@ public class CmdCalTask {
         this.taskCommand = taskCommand;
     }
 
-    public boolean getStatus() {
+    public TaskStatus getStatus() {
         return taskStatus;
     }
 
-    public void setStatus(boolean taskStatus) {
+    public void setStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
     }
 

@@ -27,7 +27,7 @@ public class SetSchedule implements CommandExecutor {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal WARNING: ", TextColors.YELLOW, "Task schedules are identical!"));
                     return CommandResult.empty();
                 } else {
-                    Tasks.setSchedule(schedulerTask, taskSchedule);
+                    schedulerTask.setSchedule(taskSchedule);
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " schedule successfully changed!"));
                     return CommandResult.success();
                 }

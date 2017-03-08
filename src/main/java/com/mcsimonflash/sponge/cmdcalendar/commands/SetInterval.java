@@ -27,7 +27,7 @@ public class SetInterval implements CommandExecutor {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Task intervals are identical!"));
                     return CommandResult.empty();
                 } else {
-                    Tasks.setInterval(intervalTask, taskInterval);
+                    intervalTask.setInterval(taskInterval);
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " interval successfully changed!"));
                     return CommandResult.success();
                 }
