@@ -4,24 +4,25 @@ CmdCalendar is managed and developed by Simon_Flash. For inquiries, please e-mai
 Dislaimer: CmdCalendar is a WIP BETA plugin and has not received the same extensive tests as released plugins. While relatively stable, _use this plugin at your own risk!_
 
 ## <div style="text-align: center">Important Resources</div>
-Sponge Thread(https://forums.spongepowered.org/t/cmdcalendar-calendar-automatic-command-scheduler-wip-beta/17735)
-GitHub(https://github.com/SimonFlash/CmdCalendar)
+[Sponge Thread](https://forums.spongepowered.org/t/cmdcalendar-calendar-automatic-command-scheduler-wip-beta/17735)
+
+[GitHub](https://github.com/SimonFlash/CmdCalendar)
 
 ## <div style="text-align: center">Scheduler Format</div>
 Scheduler tasks are the most powerful type of tasks offered and require the time to match the task's schedule to run. A task's schedule is compared to the server's time and uses the format below. However, CmdCalendar does not check to verify that the schedule provided is a valid date.
 
-`* * * * *
-║ ║ ║ ║ ╚═ Second: 0-59
-║ ║ ║ ╚═══ Minute: 0-59
-║ ║ ╚═════ Hour: 0-23
-║ ╚═══════ Day: 1-31
-╚═════════ Month: 1-12`
+* * * * *  
+║ ║ ║ ║ ╚═ Second: 0-59  
+║ ║ ║ ╚═══ Minute: 0-59  
+║ ║ ╚═════ Hour: 0-23  
+║ ╚═══════ Day: 1-31  
+╚═════════ Month: 1-12  
 
 CmdCalendar schedules allow for both base cases and one modifier.
 
-Number - `##`: Specifies an exact number for this value
-Blank - `*`: Ignores conditions for this value
-Increment - `/##`: Includes all whole-number multiples of ##
+Number - `##`: Specifies an exact number for this value  
+Blank - `*`: Ignores conditions for this value  
+Increment - `/##`: Includes all whole-number multiples of ##  
 
 ## <div style="text-align: center">Command Documentation</div>
 CmdCalendar's documentation is maintained in-game and can be accessed using `/CmdCal` to show available commands, their arguments, and useful invormation. Hovering over a command or argument will show a description, any aliases, the permission node, and any notes. Clicking on the base command will suggest the command to your chat bar.
