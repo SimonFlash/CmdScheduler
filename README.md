@@ -1,44 +1,76 @@
-CmdCalendar - Automatic Command Scheduler [WIP Alpha]
-Managed by Simon_Flash (mcsimonflash@gmail.com)  
+<div style="text-align: center">CmdCalendar - Automatic Command Scheduler</div>
+====== 
+CmdCalendar is managed and developed by Simon_Flash. For inquiries, please e-mail me at mcsimonflash@gmail.com
 
-Dislaimer: CmdCalendar is a WIP Alpha plugin from a new Sponge developer and has not received the same extensive tests as released plugins. Use this plugin at your own risk!
+Dislaimer: CmdCalendar is a WIP BETA plugin and has not received the same extensive tests as released plugins. While relatively stable, _use this plugin at your own risk!_
 
-CmdCalendar Documentation: CmdCalendar contains an extensive documentation in-game that can be accessed using "/CmdCal". Hovering over commands will provide a description of what the command does, the data type required, and any aliases of the command. Clicking the command will suggest the base command to your chat window. An online documentation is plannned.
+<div style="text-align: center">Important Resources</div>
+------
+Sponge Thread(https://forums.spongepowered.org/t/cmdcalendar-calendar-automatic-command-scheduler-wip-beta/17735)
+GitHub(https://github.com/SimonFlash/CmdCalendar)
 
-Shorthand Notation: Most CmdCalendar commands can be run using shorthand notation, a two character alias of a command. For example, "/CmdCal EditTask SetCommand" is equivalent to "/cc et sc". For a full list of shorthands, hover over the command in the "/CmdCal" documentation. Note that all task names are considered variables and thus do not have a shorthand.
+<div style="text-align: center">Scheduler Format</div>
+------
+Scheduler tasks are the most powerful type of tasks offered and require the time to match the task's schedule to run. A task's schedule is compared to the server's time and uses the format below. However, CmdCalendar does not check to verify that the schedule provided is a valid date.
 
-Running Commands: Commands are run with Sponge.getCommandManager.process() and will always run through Console, though this will be changeable in future versions.The command may be entered with or without the initial "/". CmdCalendar blacklists all CmdCalendar commands in addition to start, stop, reload, and op from being used in commands. Until a blacklist config is added, this may be bypassed by setting conf Settings: ignoreBlacklistCheck to "true". CmdCalendar also checks that the user has the permission for the command by default. To disable, set conf Settings: ignorePermissionCheck to "true". Changing this setting is not recommended.
+* * * * *
+║ ║ ║ ║ ╚═ Second: 0-59
+║ ║ ║ ╚═══ Minute: 0-59
+║ ║ ╚═════ Hour: 0-23
+║ ╚═══════ Day: 1-31
+╚═════════ Month: 1-12
 
-Upcoming Features: This section contains a list of planned upcoming features for a future version of CmdCalendar. If you would like to suggest a feature, visit the CmdCalendar Sponge thread (above) or send me an e-mail (also above). Asking for features will be added in order of importance and simplicity, and pushing for a new release will not help your cause. These releases are only planned; there is no guarantee they will be in specific version labled.
-		
-		1.0.1-BETA:
-			-	Tasks are created without checking commands. *
-					* This allows for the use of Vanilla commands and prevents commands from running early.
-			- Tasks save to config automatically.
-		
-		1.0.1-RELEASE:
-			-	Tasks can use IRL date/time and in-game time.
-			- Command blacklist can be configured.
-			
-		?.?.?-UNKNOWN:
-			-	The time remaining before a task runs can be obtained.
-			- Tasks can be force run (with and without altering intervals).
-			- Tasks can hold multiple commands.
-			- Tasks will only be run if specified conditions are met.
-			- Task interval time can be configured.
-					* Currently accepts minutes only.
-			- All tasks can be suspended (paused) and resumed.
-			- Tasks have multiple status cases.
+CmdCalendar schedules allow for both base cases and one modifier.
 
-Issue Reports: This section contains a list of all known bugs and issues in the most recent version of CmdCalendar. Bugs are non-intended errors that exist in the code, while issues are features that do not exist. A feature intended to be implemented into future versions is suffixed [Soon™]. Features will be added in order of importance and simplicity, and pushing for a new release will not help your cause.
-		
-		Bugs:
-			-	No bugs known. That won't last long.
-		
-		Issues:
-			- NL	Commands can only be run on intervals [Soon™]*
-							* CmdCalendar will implement Interval, DateTime, and GameTick tasks.
-			-	NL.	Command may only be run through Console. [Soon™]
-							* Source changes will be supported before the full release.
-			-	NL.	Tasks do not save to config automatically [Soon™]*
-							* Available in the BETA release.
+Number - `##`: Specifies an exact number for this value
+Blank - `*`: Ignores conditions for this value
+Increment - `/##`: Includes all whole-number multiples of ##
+
+<div style="text-align: center">Command Documentation</div>
+------
+CmdCalendar's documentation is maintained in-game and can be accessed using `/CmdCal` to show available commands, their arguments, and useful invormation. Hovering over a command or argument will show a description, any aliases, the permission node, and any notes. Clicking on the base command will suggest the command to your chat bar.
+
+`/CmdCal`: Opens the in-game command documentation
+`/CmdCal CreateTask <Type> <Name>`: Creates a `Type` task named `Name`
+`/CmdCal DeleteTask <Name>`: Deletes a task named `Name`
+`/CmdCal EditTask <Variable> <Name> <Value>`: Sets the `Variable` attribute of the task named `Name` to `Value`
+ * `/CmdCal EditTask SetCommand <Name> <Value>`: Sets the command of the task named `Name` to `Value`
+ * `/CmdCal EditTask SetDescription <Name> <Value`: Sets the description of the task named `Name` to `Value`
+ * `/CmdCal EditTask SetInterval <Name> <Value>`: Sets the interval of an Interval task named `Name` to `Value`
+ * `/CmdCal EditTask SetName <Name> <Value>`: Changes the name of the named `Name` to `Value`
+ * `/CmdCal EditTask SetSchedule <Name> <Value>`: Sets the schedule of a Scheduler task named `Name` to `Value`
+`/CmdCal ShowTask <Name>`: Shows detailed information about the task named `Name`
+`/CmdCal StartTask <Name>`: Activates the task named `Name`
+`/CmdCal StopTask <Name>`: Halts the task named `Name`
+`/CmdCal TaskList`: Shows basic information about all tasks
+
+In addition to the commands above, CmdCalendar also offers various debug commands should the need arise.
+
+`/CmdCal Debug <Subcommand>`: Base debug command
+ * `/CmdCal Debug ListConcealed`: Shows all concealed tasks
+ * `/CmdCal Debug LoadConfig`: Loads tasks from the config
+ * `/CmdCal Debug SaveConfig`: Saves tasks to the config
+ * `/CmdCal Debug StopAll`: Halts all active or suspended tasks
+
+<div style="text-align: center">Upcoming Features</div>
+------
+This section contains a list of planned upcoming features for a future version of CmdCalendar. If you would like to suggest a feature, visit the CmdCalendar Sponge thread (above) or send me an e-mail (also above). Asking for features will be added in order of importance and simplicity, and pushing for a new release will not help your cause. These releases are only planned; there is no guarantee what version they will be implemented in.
+
++ Command flags
++ Advanced status
++ Scheduler presets
++ Additional modifiers
++ Conditions on running tasks
++ Multiple commands in tasks
++ Link tasks to run together
++ Task registration
++ Smart registration
++ Smart scheduling
++ Time remaining command
++ Reminder command
+
+<div style="text-align: center">Issue Reports</div>
+------
+This section contains a list of all known bugs and issues in the most recent version of CmdCalendar. Bugs are non-intended errors that exist in the code, while issues are features that do not exist. A feature intended to be implemented into future versions is suffixed [Soon™]. Features will be added in order of importance and simplicity, and pushing for a new release will not help your cause.
+
++ No issues are currently known! That won't last long...
