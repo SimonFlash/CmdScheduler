@@ -12,11 +12,11 @@ Dislaimer: CmdCalendar is a WIP BETA plugin and has not received the same extens
 Scheduler tasks are the most powerful type of tasks offered and require the time to match the task's schedule to run. A task's schedule is compared to the server's time and uses the format below. However, CmdCalendar does not check to verify that the schedule provided is a valid date.
 
 * * * * *  
-║ ║ ║ ║ ╚═ Second: 0-59  
-║ ║ ║ ╚═══ Minute: 0-59  
+║ ║ ║ ║ ╚═ Month: 1-12  
+║ ║ ║ ╚═══ Day: 1-31  
 ║ ║ ╚═════ Hour: 0-23  
-║ ╚═══════ Day: 1-31  
-╚═════════ Month: 1-12  
+║ ╚═══════ Minute: 0-59  
+╚═════════ Second: 0-59  
 
 CmdCalendar schedules allow for both base cases and one modifier.
 
