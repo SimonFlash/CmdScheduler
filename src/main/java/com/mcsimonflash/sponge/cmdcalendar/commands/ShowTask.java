@@ -5,7 +5,6 @@ import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskStatus;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Interval;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Scheduler;
-
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -19,53 +18,53 @@ public class ShowTask implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         String taskName = args.<String>getOne("taskName").get();
 
-        if (!Tasks.verifyTask(taskName)) {
-            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist! /CmdCal CreateTask ", taskName, " to create task."));
-            return CommandResult.empty();
-        } else {
-            CmdCalTask cmdCalTask = Tasks.getTask(taskName);
-            src.sendMessage(Text.of(TextColors.DARK_AQUA, "Task: ", TextColors.AQUA, cmdCalTask.getName()));
-            src.sendMessage(Text.of(TextColors.DARK_AQUA, "Type: ", TextColors.AQUA, cmdCalTask.getType()));
+        if (Tasks.verifyTask(taskName)) {
+            CmdCalTask ccTask = Tasks.getTask(taskName);
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, "Name: ", TextColors.AQUA, ccTask.getName()));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, "Type: ", TextColors.AQUA, ccTask.getType()));
 
-            if (cmdCalTask instanceof Scheduler) {
-                Scheduler schedulerTask = (Scheduler) cmdCalTask;
-                if (schedulerTask.getSchedule().equals("")) {
+            if (ccTask instanceof Scheduler) {
+                if (((Scheduler) ccTask).getSchedule().equals("")) {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "Schedule: No schedule set!"));
                 } else {
-                    src.sendMessage(Text.of(TextColors.DARK_RED, "Schedule: ", TextColors.RED, schedulerTask.getSchedule()));
+                    src.sendMessage(Text.of(TextColors.DARK_AQUA, "Schedule: ", TextColors.AQUA, ((Scheduler) ccTask).getSchedule()));
                 }
-            } else if (cmdCalTask instanceof Interval) {
-                Interval intervalTask = (Interval) cmdCalTask;
-                if (intervalTask.getInterval() == -1) {
+            } else if (ccTask instanceof Interval) {
+                if (((Interval) ccTask).getInterval() == -1) {
                     src.sendMessage(Text.of(TextColors.DARK_RED, "Interval: No interval set!"));
                 } else {
-                    src.sendMessage(Text.of(TextColors.DARK_RED, "Schedule: ", TextColors.RED, intervalTask.getInterval()));
+                    src.sendMessage(Text.of(TextColors.DARK_AQUA, "Interval: ", TextColors.AQUA, ((Interval) ccTask).getInterval()));
                 }
             }
 
-            if (cmdCalTask.getCommand().equals("")) {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Command: ", TextColors.AQUA, "No command set!"));
+            if (ccTask.getCommand().equals("")) {
+                src.sendMessage(Text.of(TextColors.DARK_RED, "Command: ", TextColors.RED, "No command set!"));
             } else {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Command: /", cmdCalTask.getCommand()));
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Command: /", ccTask.getCommand()));
             }
 
-            if (cmdCalTask.getDescription().equals("")) {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Description: ", TextColors.AQUA, "No description set!"));
+            if (ccTask.getDescription().equals("")) {
+                src.sendMessage(Text.of(TextColors.GOLD, "Description: ", TextColors.YELLOW, "No description set!"));
             } else {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Description: ", TextColors.AQUA, cmdCalTask.getDescription()));
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Description: ", TextColors.AQUA, ccTask.getDescription()));
             }
 
-            if (cmdCalTask.getStatus().equals(TaskStatus.Active)) {
+            if (ccTask.getStatus().equals(TaskStatus.Active)) {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.GREEN, "Active"));
-            } else if (cmdCalTask.getStatus().equals(TaskStatus.Suspended)) {
+            } else if (ccTask.getStatus().equals(TaskStatus.Suspended)) {
                 src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.YELLOW, "Suspended"));
-            } else if (cmdCalTask.getStatus().equals(TaskStatus.Halted)) {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.RED, "Halted"));
-            } else if (cmdCalTask.getStatus().equals(TaskStatus.Concealed)) {
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.WHITE, "Concealed"));
+            } else if (ccTask.getStatus().equals(TaskStatus.Halted)) {
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.GOLD, "Halted"));
+            } else if (ccTask.getStatus().equals(TaskStatus.Concealed)) {
+                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Status: ", TextColors.GRAY, "Concealed"));
+            } else if (ccTask.getStatus().equals(TaskStatus.ERROR)) {
+                src.sendMessage(Text.of(TextColors.DARK_RED, "Status: ", TextColors.RED, "Error - not configured properly"));
             }
 
             return CommandResult.success();
+        } else {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist!"));
+            return CommandResult.empty();
         }
     }
 }

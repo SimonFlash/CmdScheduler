@@ -7,7 +7,7 @@ public class CmdCalTask {
         GameTime,
         Interval,
         GameTick,
-        UNKNOWN,
+        ERROR,
     }
 
     public enum TaskStatus {
@@ -15,14 +15,14 @@ public class CmdCalTask {
         Suspended,
         Halted,
         Concealed,
+        ERROR,
     }
 
     private String taskName;
     private TaskType taskType;
-
     private String taskDescription = "";
     private String taskCommand = "";
-    private TaskStatus taskStatus = TaskStatus.Halted;
+    private TaskStatus taskStatus = TaskStatus.ERROR;
 
 
     public CmdCalTask(String taskName, TaskType taskType) {
@@ -30,7 +30,7 @@ public class CmdCalTask {
         this.taskType = taskType;
     }
 
-    public static TaskStatus parseStatus (String taskStatus) {
+    public static TaskStatus parseStatus(String taskStatus) {
         switch (taskStatus.toLowerCase()) {
             case "active":
                 return TaskStatus.Active;
@@ -38,8 +38,25 @@ public class CmdCalTask {
                 return TaskStatus.Suspended;
             case "halted":
                 return TaskStatus.Halted;
-            default:
+            case "concealed":
                 return TaskStatus.Concealed;
+            default:
+                return TaskStatus.ERROR;
+        }
+    }
+
+    public static String printStatus(TaskStatus taskStatus) {
+        switch (taskStatus) {
+            case Active:
+                return "Active";
+            case Concealed:
+                return "Concealed";
+            case Halted:
+                return "Halted";
+            case Suspended:
+                return "Suspended";
+            default:
+                return "Error";
         }
     }
 
@@ -47,52 +64,57 @@ public class CmdCalTask {
         switch (taskType.toLowerCase()) {
             case "scheduler":
             case "sched":
+            case "s":
                 return TaskType.Scheduler;
             case "interval":
             case "inter":
+            case "i":
                 return TaskType.Interval;
             default:
-                return TaskType.UNKNOWN;
+                return TaskType.ERROR;
+        }
+    }
+
+    public static String printType(TaskType taskType) {
+        switch (taskType) {
+            case GameTick:
+                return "GameTick";
+            case GameTime:
+                return "GameTime";
+            case Interval:
+                return "Interval";
+            case Scheduler:
+                return "Scheduler";
+            default:
+                return "Error";
         }
     }
 
     public String getName() {
         return taskName;
     }
-
     public void setName(String taskName) {
         this.taskName = taskName;
     }
-
     public String getDescription() {
         return taskDescription;
     }
-
     public void setDescription(String taskDescription) {
         this.taskDescription = taskDescription;
     }
-
     public String getCommand() {
         return taskCommand;
     }
-
     public void setCommand(String taskCommand) {
         this.taskCommand = taskCommand;
     }
-
     public TaskStatus getStatus() {
         return taskStatus;
     }
-
     public void setStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
     }
-
     public TaskType getType() {
         return taskType;
     }
-
-    public void setType(TaskType taskType) {
-        this.taskType = taskType;
-    } //SFZ: Implement
 }

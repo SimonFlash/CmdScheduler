@@ -1,6 +1,6 @@
 package com.mcsimonflash.sponge.cmdcalendar.commands;
 
-import com.mcsimonflash.sponge.cmdcalendar.RunTask;
+import com.mcsimonflash.sponge.cmdcalendar.managers.RunTask;
 
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -19,7 +19,7 @@ public class StopAll implements CommandExecutor{
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Debug commands must be confirmed!"));
             return CommandResult.empty();
         } else {
-            RunTask.delAll();
+            RunTask.removeAll();
             src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, "All tasks successfully stopped!"));
             return CommandResult.success();
         }

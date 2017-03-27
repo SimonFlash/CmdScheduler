@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar_main.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar_main.iml" group="CmdCalendar" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar_test.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar_test.iml" group="CmdCalendar" />
+      <module fileurl="file://$PROJECT_DIR$/src/main/main.iml" filepath="$PROJECT_DIR$/src/main/main.iml" />
     </modules>
   </component>
 </project>

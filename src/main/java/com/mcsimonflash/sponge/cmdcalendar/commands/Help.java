@@ -9,7 +9,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
-public class CmdCal implements CommandExecutor {
+public class Help implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 
@@ -19,12 +19,12 @@ public class CmdCal implements CommandExecutor {
                 .onClick(TextActions.suggestCommand("/CmdCal "))
                 .onHover(TextActions.showText(Text.of(
                         TextColors.DARK_AQUA, "CmdCal: ", TextColors.AQUA, "Opens command reference menu\n",
-                        TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "CmdCal, CommandCalendar, CmdCalendar, CC\n",
-                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.use")))
+                        TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "CmdCal, CommandCalendar, CmdCalendar, cc\n",
+                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.help")))
                 .append(Text.builder("<Subcommand>")
                         .color(TextColors.AQUA)
                         .onHover(TextActions.showText(Text.of(
-                                TextColors.DARK_AQUA, "Subcommands: ", TextColors.AQUA, "CreateTask, DeleteTask, EditTask, ShowTask, StartTask, StopTask, TaskList, ToggleTask\n")))
+                                TextColors.DARK_AQUA, "Subcommands: ", TextColors.AQUA, "CreateTask, DeleteTask, EditTask, ShowTask, StartTask, StopTask, TaskList, Debug\n")))
                         .build())
                 .build());
         src.sendMessage(Text.builder("/CmdCal CreateTask ")
@@ -33,7 +33,7 @@ public class CmdCal implements CommandExecutor {
                 .onHover(TextActions.showText(Text.of(
                         TextColors.DARK_AQUA, "CreateTask: ", TextColors.AQUA, "Adds a task to the task list\n",
                         TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "CreateTask, AddTask, Create, Add, ct, at\n",
-                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.tasks.create")))
+                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.task.create")))
                 .append(Text.builder("<Type> ")
                         .color(TextColors.AQUA)
                         .onHover(TextActions.showText(Text.of(
@@ -51,7 +51,7 @@ public class CmdCal implements CommandExecutor {
                 .onHover(TextActions.showText(Text.of(
                         TextColors.DARK_AQUA, "DeleteTask: ", TextColors.AQUA, "Deletes a task from the task list\n",
                         TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "DeleteTask, RemoveTask, Delete, Remove, dt, rt\n",
-                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.tasks.delete")))
+                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.task.delete")))
                 .append(Text.builder("<Name>")
                         .color(TextColors.AQUA)
                         .onHover(TextActions.showText(Text.of(
@@ -64,19 +64,19 @@ public class CmdCal implements CommandExecutor {
                 .onHover(TextActions.showText(Text.of(
                         TextColors.DARK_AQUA, "EditTask: ", TextColors.AQUA, "Changes the specified variable of a task\n",
                         TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "EditTask, Edit, et\n",
-                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.tasks.edit")))
-                .append(Text.builder("<Variable> ")
-                        .color(TextColors.AQUA)
-                        .onHover(TextActions.showText(Text.of(
-                                TextColors.DARK_AQUA, "Parameter: ", TextColors.AQUA, "Parameter to be changed [Command, Description, Interval, Name, Schedule]\n",
-                                TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "SetCommand, Command, SetCmd, Cmd, sc, SetDescription, Description, SetDesc, Desc, sd, SetInterval, Interval, SetInt, Int, si, SetName, Name, sn, SetSchedule, Schedule, SetSched, Sched, ss\n",
-                                TextColors.DARK_AQUA, "Note: ", TextColors.AQUA, "SetInterval and SetSchedule may only be used on Interval and Scheduler tasks respectively\n",
-                                TextColors.DARK_AQUA, "Permissions: ", TextColors.AQUA, "cmdcalendar.edit.command, cmdcalendar.edit.description, cmdcalendar.edit.interval, cmdcaledar.edit.name, cmdcalendar.edit.schedule")))
-                        .build())
+                        TextColors.DARK_AQUA, "Permission: ", TextColors.AQUA, "cmdcalendar.task.edit")))
                 .append(Text.builder("<Name> ")
                         .color(TextColors.AQUA)
                         .onHover(TextActions.showText(Text.of(
                                 TextColors.DARK_AQUA, "Task Name<String>: ", TextColors.AQUA, "Name of the task [no spaces]")))
+                        .build())
+                .append(Text.builder("<Variable> ")
+                        .color(TextColors.AQUA)
+                        .onHover(TextActions.showText(Text.of(
+                                TextColors.DARK_AQUA, "Variable: ", TextColors.AQUA, "Variable to be changed [Command, Description, Interval, Name, Schedule]\n",
+                                TextColors.DARK_AQUA, "Aliases: ", TextColors.AQUA, "Command, cmd, c, Description, desc, d, Interval, inter, i, Name, n, Schedule, sched, s\n",
+                                TextColors.DARK_AQUA, "Note: ", TextColors.AQUA, "Interval and Schedule may only be used on Interval and Scheduler tasks respectively\n",
+                                TextColors.DARK_AQUA, "Permissions: ", TextColors.AQUA, "cmdcalendar.edit.command, cmdcalendar.edit.description, cmdcalendar.edit.interval, cmdcaledar.edit.name, cmdcalendar.edit.schedule")))
                         .build())
                 .append(Text.builder("<Value> ")
                         .color(TextColors.AQUA)

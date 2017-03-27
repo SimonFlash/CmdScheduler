@@ -1,170 +1,195 @@
 package com.mcsimonflash.sponge.cmdcalendar.managers;
 
 import com.google.common.collect.Lists;
-
+import com.google.common.reflect.TypeToken;
 import com.mcsimonflash.sponge.cmdcalendar.CmdCalendar;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
-import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskType;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskStatus;
+import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskType;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Interval;
 import com.mcsimonflash.sponge.cmdcalendar.objects.Scheduler;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.Sponge;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@ConfigSerializable
 public class Config {
     private static ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
             .setPath(CmdCalendar.getPlugin().getDefaultConfig())
             .build();
     private static CommentedConfigurationNode rootNode;
 
-    private static TimeUnit timeUnit;
-    public static TimeUnit getTimeUnit() {
-        return timeUnit;
-    }
+    private static List<String> blacklist = Lists.newArrayList();
+    private static boolean blacklistCheck;
+    private static boolean activateOnStartup;
+    private static boolean intervalDelayStart;
+    private static TimeUnit intervalTimeUnit;
 
-    private static boolean ignorePermissionCheck;
-    public static boolean isIgnorePermissionCheck() {
-        return ignorePermissionCheck;
-    }
-
-    private static boolean ignoreBlacklistCheck;
-    public static boolean isIgnoreBlacklistCheck() {
-        return ignoreBlacklistCheck;
-    }
-
-    private static boolean disableRunTasksOnStartup;
-    public static boolean isDisableRunTasksOnStartup() {
-        return disableRunTasksOnStartup;
-    }
-
-    public static boolean readConfig() {
+    public static void readConfig() {
+        if (Files.notExists(CmdCalendar.getPlugin().getDefaultConfig())) {
+            try {
+                Sponge.getAssetManager().getAsset(CmdCalendar.getPlugin(), "defaultConfig.conf").get().copyToFile(CmdCalendar.getPlugin().getDefaultConfig());
+                CmdCalendar.getPlugin().getLogger().warn("Default Config loaded! Edit cmdcalendar.conf to change settings and create tasks!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         loadConfig();
 
-        timeUnit = toTimeUnit(rootNode.getNode("Settings", "timeUnit").getString("seconds"));
-        ignoreBlacklistCheck = rootNode.getNode("Settings", "ignoreBlacklistCheck").getBoolean(false);
-        ignorePermissionCheck = rootNode.getNode("Settings", "ignorePermissionCheck").getBoolean(false);
-        disableRunTasksOnStartup = rootNode.getNode("Settings", "disableRunTasksOnStartup").getBoolean(false);
+        Tasks.removeAll();
+        RunTask.removeAll();
 
-        // String schedulerFormat = rootNode.getNode("Settings", "schedulerFormat").getString("ss mm HH dd MM yyyy");
-        // Dates.setSchedulerFormat(Dates.verifySchedulerFormat(schedulerFormat)); SFZ: Implement;
+        blacklistCheck = rootNode.getNode("config", "task_blacklist_check").getBoolean(true);
+        activateOnStartup = rootNode.getNode("config", "activate_on_startup").getBoolean(true);
+        intervalDelayStart = rootNode.getNode("config", "interval_delay_start").getBoolean(true);
+        intervalTimeUnit = parseTimeUnit(rootNode.getNode("config", "interval_time_unit").getString("Seconds"));
 
-        Map<Object, ? extends ConfigurationNode> taskNameMap = rootNode.getNode("Tasks").getChildrenMap();
-        for (Map.Entry<Object, ? extends ConfigurationNode> entry : taskNameMap.entrySet()) {
-            String taskName = (String) entry.getKey();
-            TaskType taskType = CmdCalTask.parseType(rootNode.getNode("Tasks", taskName, "Type").getString(""));
-            boolean addTask = true;
+        try {
+            rootNode.getNode("config", "task_blackslist").getList(TypeToken.of(String.class));
+        } catch (ObjectMappingException e) {
+            e.printStackTrace();
+            CmdCalendar.getPlugin().getLogger().error("[ERROR]: unable to read blacklist! Reverting to defaults.");
+            blacklist.addAll(Arrays.asList(("start, restart, stop, cc, cmdcal, cmdcalendar, commandcalendar").split(", ")));
+        }
+
+        blacklist.addAll(Arrays.asList(rootNode.getNode("config", "blacklist").getString("start, restart, stop, cc, cmdcal, cmdcalendar, commandcalendar").split(", ")));
+
+        List<String> loadedTasks = Lists.newArrayList();
+        Map<Object, ? extends ConfigurationNode> taskNameMap = rootNode.getNode("tasks").getChildrenMap();
+        for (Map.Entry<Object, ? extends ConfigurationNode> task : taskNameMap.entrySet()) {
+            String taskName = (String) task.getKey();
+            TaskType taskType = CmdCalTask.parseType(rootNode.getNode("tasks", taskName, "type").getString(""));
 
             if (Tasks.verifyTask(taskName)) {
                 CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " name has multiple instances!");
-                addTask = false;
+                break;
             }
-            if (taskType.equals(TaskType.UNKNOWN)) {
+            if (taskType.equals(TaskType.ERROR)) {
                 CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " type is not valid!");
-                addTask = false;
+                break;
             }
 
-            if (addTask) {
-                Tasks.addTask(taskName, taskType);
-                CmdCalTask task = Tasks.getTask(taskName);
+            CmdCalendar.getPlugin().getLogger().debug("[DEBUG]: Adding task " + taskName);
+            CmdCalTask ccTask = Tasks.newTask(taskName, taskType);
+            loadedTasks.add(taskName);
+            CmdCalendar.getPlugin().getLogger().debug("[DEBUG]: Added " + taskName);
 
-                if (isDisableRunTasksOnStartup()) {
-                    task.setStatus(TaskStatus.Halted);
-                } else {
-                    task.setStatus(CmdCalTask.parseStatus(rootNode.getNode("Tasks", taskName, "Status").getString("Halted")));
+            if (ccTask instanceof Scheduler) {
+
+                String taskSchedule = rootNode.getNode("tasks", taskName, "schedule").getString("");
+                String[] split = taskSchedule.split(" ");
+                if (split.length != 5) {
+                    CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " schedule has incorrect number of values!");
                 }
-
-                if (taskType.equals(TaskType.Scheduler) || taskType.equals(TaskType.GameTime)) {
-                    String taskSchedule = rootNode.getNode("Tasks", taskName, "Schedule").getString();
-                    ((Scheduler) task).setSchedule(taskSchedule);
-                    // Validate taskScheduler; SFZ: Implement;
-                } else if (taskType.equals(TaskType.Interval) || taskType.equals(TaskType.GameTick)) {
-                    int taskInterval = rootNode.getNode("Tasks", taskName, "Interval").getInt(60);
-                    if (taskInterval < 1) {
-                        CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " interval is below 1!");
-                        task.setStatus(TaskStatus.Halted);
-                    } else {
-                        ((Interval) task).setInterval(taskInterval);
+                ((Scheduler) ccTask).setSchedule(taskSchedule);
+                for (String str : split) {
+                    if (str.equals("*")) {
+                        break;
+                    } else if (str.length() > 1 && str.substring(0,1).equals("/")) {
+                        str = str.substring(1);
+                    }
+                    try {
+                        Integer.parseInt(str);
+                    } catch (NumberFormatException ignored) {
+                        CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " schedule has incorrect format!");
+                        ((Scheduler) ccTask).setSchedule("");
                     }
                 }
 
-                String taskCommand = rootNode.getNode("Tasks", taskName, "Command").getString("");
-                task.setCommand(taskCommand);
-                if (taskCommand.equals("")) {
-                    CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " command is not set!");
-                    task.setStatus(TaskStatus.Halted);
-                } else if (Commands.testCommandExists(taskCommand)) { //SFZ: Implement
-                    CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " command is not recognized!");
-                    task.setStatus(TaskStatus.Halted);
-                } else if (Commands.testCommandBlacklisted(taskCommand)) {
-                    CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " command is blacklisted!");
-                    task.setStatus(TaskStatus.Halted);
+            } else if (ccTask instanceof Interval) {
+                int taskInterval = rootNode.getNode("tasks", taskName, "interval").getInt(-1);
+                if (taskInterval < 1) {
+                    CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " interval is less than 1!");
+                } else {
+                    ((Interval) Tasks.getTask(taskName)).setInterval(taskInterval);
                 }
+            }
 
-                task.setDescription(rootNode.getNode("Tasks", taskName, "Description").getString(""));
+            TaskStatus taskStatus = CmdCalTask.parseStatus(rootNode.getNode("tasks", taskName, "status").getString("Halted"));
+            if (activateOnStartup && taskStatus != TaskStatus.ERROR) {
+                ccTask.setStatus(TaskStatus.Halted);
+            } else {
+                ccTask.setStatus(taskStatus);
+            }
+
+            String taskCommand = rootNode.getNode("tasks", taskName, "command").getString("");
+            if (taskCommand.isEmpty()) {
+                CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " command is not set!");
+                ccTask.setStatus(TaskStatus.ERROR);
+            } else if (blacklistCheck && Commands.testCommandBlacklisted(taskCommand)) {
+                CmdCalendar.getPlugin().getLogger().error("[ERROR]: " + taskName + " command is blacklisted!");
+                ccTask.setStatus(TaskStatus.ERROR);
+            } else {
+                ccTask.setCommand(taskCommand);
+            }
+
+            String taskDescription = rootNode.getNode("tasks", taskName, "description").getString("");
+            if (taskDescription.isEmpty()) {
+                CmdCalendar.getPlugin().getLogger().warn("[WARN]: " + taskName + " description is not set!");
+            } else {
+                ccTask.setDescription(taskDescription);
             }
         }
 
-        if (!Tasks.getTaskList().isEmpty()) {
-            List<String> loadedTasks = Lists.newArrayList();
-            for (CmdCalTask task : Tasks.getTaskList()) {
-                loadedTasks.add(task.getName());
-            }
-            String loadedTaskString = "Loaded " + String.join(", ", loadedTasks) + ".";
-            CmdCalendar.getPlugin().getLogger().info(loadedTaskString);
-        } else {
+        if (loadedTasks.isEmpty()) {
             CmdCalendar.getPlugin().getLogger().info("No tasks loaded!");
+        } else {
+            CmdCalendar.getPlugin().getLogger().info("Loaded " + String.join(", ", loadedTasks) + ".");
+            for (String str : loadedTasks) {
+                CmdCalendar.getPlugin().getLogger().info("[DEBUG]: Found " + Tasks.getTask(str) + " in task map");
+            }
+            RunTask.syncTasks();
         }
-        return true;
     }
 
     public static boolean writeConfig() {
+        loadConfig();
 
+        rootNode.getNode("config", "task_blacklist_check").setValue(blacklistCheck);
+        rootNode.getNode("config", "task_activate_on_startup").setValue(activateOnStartup);
+        rootNode.getNode("config", "interval_delay_start").setValue(intervalDelayStart);
+        rootNode.getNode("config", "interval_time_unit").setValue(printTimeUnit(intervalTimeUnit));
 
-        rootNode.getNode("Settings", "timeUnit").setValue(("" + timeUnit).replaceFirst("TimeUnit.", ""));
-        rootNode.getNode("Settings", "ignoreBlacklistCheck").setValue(ignoreBlacklistCheck);
-        rootNode.getNode("Settings", "ignorePermissionCheck").setValue(ignorePermissionCheck);
-        rootNode.getNode("Settings", "disableRunTasksOnStartup").setValue(disableRunTasksOnStartup);
+        rootNode.getNode("config", "task_blacklist").setValue(blacklist);
 
-        rootNode.getNode("Settings", "timeUnit").setComment("Time measurement for Interval tasks [Seconds, Minutes, Hours, Days]");
-        rootNode.getNode("Settings", "ignoreBlacklist").setComment("Prevent checking the blacklist [CmdCalendar commands, start, stop, restart, op]");
-        rootNode.getNode("Settings", "ignorePermissionCheck").setComment("Prevent verification of source permission for commands [Allows users to create a task for any command]");
-        rootNode.getNode("Settings", "disableRunTasksOnStartup").setComment("Prevent tasks from running on startup [WARNING: Sets task Status to false for all tasks!]");
-
-        for (CmdCalTask task : Tasks.getTaskList()) {
-            String taskName = task.getName();
-            rootNode.getNode("Tasks", taskName, "Type").setValue("" + task.getType());
-            if (task instanceof Scheduler) {
-                Scheduler schedulerTask = (Scheduler) task;
-                rootNode.getNode("Tasks", taskName, "Schedule").setValue(schedulerTask.getSchedule());
-            } else if (task instanceof Interval) {
-                Interval intervalTask = (Interval) task;
-                rootNode.getNode("Tasks", taskName, "Interval").setValue(intervalTask.getInterval());
-            } else {
-                CmdCalendar.getPlugin().getLogger().info("[ERROR]: " + taskName + " TaskType not recognized!");
-            }
-            rootNode.getNode("Tasks", taskName, "Command").setValue(task.getCommand());
-            rootNode.getNode("Tasks", taskName, "Description").setValue(task.getDescription());
-            rootNode.getNode("Tasks", taskName, "Status").setValue(task.getStatus());
+        for (CmdCalTask ccTask : Tasks.getSortedTaskMap().values()) {
+            syncTask(ccTask);
         }
-        Tasks.getTaskList().clear();
 
         if (saveConfig()) {
-            CmdCalendar.getPlugin().getLogger().info("CmdCal: Config successfully saved.");
+            CmdCalendar.getPlugin().getLogger().info("[CmdCal]: Config successfully saved.");
             return true;
         } else {
-            CmdCalendar.getPlugin().getLogger().error("CmdCal: Config could not save!");
+            CmdCalendar.getPlugin().getLogger().error("[ERROR]: Config could not save!");
             return false;
         }
+    }
+
+    public static void syncTask(CmdCalTask ccTask) {
+        Tasks.reloadStatus(ccTask.getName());
+        rootNode.getNode("tasks", ccTask.getName(), "type").setValue(CmdCalTask.printType(ccTask.getType()));
+        if (ccTask instanceof Scheduler) {
+            rootNode.getNode("tasks", ccTask.getName(), "schedule").setValue(((Scheduler) ccTask).getSchedule());
+        } else if (ccTask instanceof Interval) {
+            rootNode.getNode("tasks", ccTask.getName(), "interval").setValue(((Interval) ccTask).getInterval());
+        } else {
+            CmdCalendar.getPlugin().getLogger().info("[ERROR]: " + ccTask.getName() + " TaskType not recognized!");
+        }
+        rootNode.getNode("tasks", ccTask.getName(), "command").setValue(ccTask.getCommand());
+        rootNode.getNode("tasks", ccTask.getName(), "description").setValue(ccTask.getDescription());
+        rootNode.getNode("tasks", ccTask.getName(), "status").setValue(CmdCalTask.printStatus(ccTask.getStatus()));
+    }
+
+    public static void deleteTask(CmdCalTask ccTask) {
+        rootNode.getNode("tasks", ccTask.getName()).setValue(null);
     }
 
     private static void loadConfig() {
@@ -185,7 +210,7 @@ public class Config {
         }
     }
 
-    private static TimeUnit toTimeUnit(String time) {
+    public static TimeUnit parseTimeUnit(String time) {
         switch (time.toLowerCase()) {
             case "seconds":
                 return TimeUnit.SECONDS;
@@ -196,7 +221,40 @@ public class Config {
             case "days":
                 return TimeUnit.DAYS;
             default:
+                CmdCalendar.getPlugin().getLogger().warn("Interval Time Unit not found - currently using Seconds");
                 return TimeUnit.SECONDS;
         }
+    }
+
+    public static String printTimeUnit(TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case SECONDS:
+                return "Seconds";
+            case MINUTES:
+                return "Minutes";
+            case HOURS:
+                return "Hours";
+            case DAYS:
+                return "Days";
+            default:
+                CmdCalendar.getPlugin().getLogger().warn("Interval Time Unit not found - reverting to Seconds");
+                return "Seconds";
+        }
+    }
+
+    public static List<String> getBlacklist() {
+        return blacklist;
+    }
+    public static boolean isBlacklistCheck() {
+        return blacklistCheck;
+    }
+    public static boolean isActivateOnStartup() {
+        return activateOnStartup;
+    }
+    public static boolean isIntervalDelayStart() {
+        return intervalDelayStart;
+    }
+    public static TimeUnit getIntervalTimeUnit() {
+        return intervalTimeUnit;
     }
 }
