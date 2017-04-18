@@ -1,6 +1,7 @@
 package com.mcsimonflash.sponge.cmdcalendar.commands;
 
 import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
+import com.mcsimonflash.sponge.cmdcalendar.managers.Util;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -13,20 +14,19 @@ import org.spongepowered.api.text.format.TextColors;
 public class StopTask implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String taskName = args.<String>getOne("taskName").get();
+        String name = args.<String>getOne("taskName").get();
 
-        if (Tasks.verifyTask(taskName)) {
-            if (Tasks.getTask(taskName).getStatus().equals(CmdCalTask.TaskStatus.Active)) {
-                Tasks.stopTask(taskName);
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " Disabled."));
-                return CommandResult.success();
-            } else {
-                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " is not running!"));
-                return CommandResult.empty();
-            }
-        } else {
-            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist!"));
+        if (!Tasks.taskMap.containsKey(name)) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " does not exist!"));
             return CommandResult.empty();
         }
+        CmdCalTask ccTask = Tasks.taskMap.get(name);
+        if (!ccTask.Status.equals(CmdCalTask.TaskStatus.Active) && !ccTask.Status.equals(CmdCalTask.TaskStatus.Concealed_Active)) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, ccTask.Name, " is not running!"));
+            return CommandResult.empty();
+        }
+        Util.stopTask(ccTask);
+        src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, ccTask.Name, " Disabled."));
+        return CommandResult.success();
     }
 }

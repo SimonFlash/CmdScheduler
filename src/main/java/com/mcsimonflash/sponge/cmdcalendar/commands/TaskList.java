@@ -1,5 +1,6 @@
 package com.mcsimonflash.sponge.cmdcalendar.commands;
 
+import com.mcsimonflash.sponge.cmdcalendar.managers.Util;
 import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskStatus;
@@ -15,32 +16,45 @@ import org.spongepowered.api.text.format.TextColors;
 public class TaskList implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        if (Tasks.getSortedTaskMap().isEmpty()) {
+        TaskStatus status = args.<String>getOne("status").isPresent() ? Util.parseStatus(args.<String>getOne("status").get()) : null;
+
+        if (Tasks.taskMap.isEmpty()) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "No tasks exist!"));
             return CommandResult.empty();
-        } else {
-            int c = 1;
-            for (CmdCalTask ccTask : Tasks.getSortedTaskMap().values()) {
-                TextColor statusColor;
-                if (ccTask.getStatus().equals(TaskStatus.Concealed)) {
-                    break;
-                }
-                switch (ccTask.getStatus()) {
-                    case Active:
-                        statusColor = TextColors.GREEN;
-                        break;
-                    case Halted:
-                        statusColor = TextColors.YELLOW;
-                        break;
-                    case Suspended:
-                        statusColor = TextColors.DARK_GREEN;
-                        break;
-                    default:
-                        statusColor = TextColors.RED;
-                }
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", ccTask.getName(), " [", TextColors.AQUA, ccTask.getType(), TextColors.DARK_AQUA, "] -> ", statusColor, "Active"));
-            }
-            return CommandResult.success();
         }
+        if (status != null && (status.equals(TaskStatus.Concealed_Active) || status.equals(TaskStatus.Concealed_Halted))) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Concealed tasks must be viewed through /CmdCal Debug ListConcealed!"));
+            return CommandResult.empty();
+        }
+        int c = 1;
+        boolean foundTask = false;
+        for (CmdCalTask ccTask : Tasks.taskMap.values()) {
+            if ((ccTask.Status.equals(TaskStatus.Concealed_Active) || ccTask.Status.equals(TaskStatus.Concealed_Halted)) ||
+                    (status != null && !ccTask.Status.equals(status))) {
+                continue;
+            }
+            foundTask = true;
+            TextColor color = TextColors.GRAY;
+            switch (ccTask.Status) {
+                case Active:
+                    color = TextColors.GREEN;
+                    break;
+                case Halted:
+                    color = TextColors.YELLOW;
+                    break;
+                case Suspended:
+                    color = TextColors.GOLD;
+                    break;
+                case ERROR:
+                    color = TextColors.RED;
+            }
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, c++, ": ", TextColors.AQUA, ccTask.Name, TextColors.DARK_AQUA,
+                    " [", TextColors.AQUA, Util.printType(ccTask.Type), TextColors.DARK_AQUA, "] -> ", color, Util.printStatus(ccTask.Status)));
+        }
+        if (!foundTask) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "No tasks found!"));
+            return CommandResult.empty();
+        }
+        return CommandResult.success();
     }
 }

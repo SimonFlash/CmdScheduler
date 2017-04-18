@@ -1,6 +1,7 @@
 package com.mcsimonflash.sponge.cmdcalendar.commands;
 
 import com.mcsimonflash.sponge.cmdcalendar.managers.Config;
+import com.mcsimonflash.sponge.cmdcalendar.managers.Util;
 import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
 import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask.TaskType;
@@ -13,23 +14,23 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 public class CreateTask implements CommandExecutor {
+
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String taskName = args.<String>getOne("taskName").get();
-        TaskType taskType = CmdCalTask.parseType(args.<String>getOne("taskType").get());
+        String name = args.<String>getOne("name").get();
+        TaskType type = Util.parseType(args.<String>getOne("type").get());
 
-        if (taskType.equals(TaskType.ERROR)) {
+        if (type.equals(TaskType.ERROR)) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Task type does not exist!"));
             return CommandResult.empty();
-        } else {
-            if (Tasks.verifyTask(taskName)) {
-                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " already exists!"));
-                return CommandResult.empty();
-            } else {
-                Config.syncTask(Tasks.newTask(taskName, taskType));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " created!"));
-                return CommandResult.success();
-            }
         }
+        if (Tasks.taskMap.containsKey(name)) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " already exists!"));
+            return CommandResult.empty();
+        }
+        CmdCalTask ccTask = Util.createTask(name, type);
+        Config.writeTask(ccTask);
+        src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, name, " created!"));
+        return CommandResult.success();
     }
 }

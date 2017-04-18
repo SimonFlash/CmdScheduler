@@ -1,11 +1,11 @@
 package com.mcsimonflash.sponge.cmdcalendar.commands;
 
-import com.mcsimonflash.sponge.cmdcalendar.managers.Commands;
+import com.mcsimonflash.sponge.cmdcalendar.managers.Util;
 import com.mcsimonflash.sponge.cmdcalendar.managers.Config;
-import com.mcsimonflash.sponge.cmdcalendar.managers.RunTask;
 import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
-import com.mcsimonflash.sponge.cmdcalendar.objects.Interval;
-import com.mcsimonflash.sponge.cmdcalendar.objects.Scheduler;
+import com.mcsimonflash.sponge.cmdcalendar.objects.CmdCalTask;
+import com.mcsimonflash.sponge.cmdcalendar.objects.IntervalTask;
+import com.mcsimonflash.sponge.cmdcalendar.objects.SchedulerTask;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -15,112 +15,85 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 public class EditTask implements CommandExecutor {
+
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String taskName = args.<String>getOne("taskName").get();
+        String name = args.<String>getOne("name").get();
         String variable = args.<String>getOne("variable").get();
         String value = args.<String>getOne("value").get();
 
-        if (Tasks.verifyTask(taskName)) {
-            if (RunTask.isActive(Tasks.getTask(taskName))) {
-                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " is currently running!"));
-                return CommandResult.empty();
-            } else {
-                switch (variable.toLowerCase()) {
-                    case "command":
-                    case "cmd":
-                    case "c":
-                        if (value.length() > 1 && value.substring(0, 1).equals("/")) {
-                            value = value.substring(1);
-                        }
-                        if (Config.isBlacklistCheck() && Commands.testCommandBlacklisted(value)) {
-                            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Command is blacklisted!"));
-                            return CommandResult.empty();
-                        }
-                        Tasks.getTask(taskName).setCommand(value);
-                        Config.syncTask(Tasks.getTask(taskName));
-                        src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " command set!"));
-                        return CommandResult.success();
-                    case "description":
-                    case "desc":
-                    case "d":
-                        Tasks.getTask(taskName).setDescription(value);
-                        Config.syncTask(Tasks.getTask(taskName));
-                        src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " description set!"));
-                        return CommandResult.success();
-                    case "interval":
-                    case "inter":
-                    case "i":
-                        if (Tasks.getTask(taskName) instanceof Interval) {
-                            try {
-                                int taskInterval = Integer.parseInt(value);
-                                if (taskInterval < 1) {
-                                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Interval is less than 1!"));
-                                    return CommandResult.empty();
-                                } else {
-                                    ((Interval) Tasks.getTask(taskName)).setInterval(taskInterval);
-                                    Config.syncTask(Tasks.getTask(taskName));
-                                    src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " interval set!"));
-                                    return CommandResult.success();
-                                }
-                            } catch (NumberFormatException ignored) {
-                                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Interval was not numeric!"));
-                                return CommandResult.empty();
-                            }
-                        } else {
-                            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, "is not an interval task!"));
-                            return CommandResult.empty();
-                        }
-                    case "name":
-                    case "n":
-                        if (value.contains(" ")) {
-                            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Name must not contain spaces!"));
-                            return CommandResult.empty();
-                        } else {
-                            Tasks.getTask(taskName).setName(value);
-                            Config.syncTask(Tasks.getTask(taskName));
-                            src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, "Name changed to ", value));
-                            return CommandResult.success();
-                        }
-                    case "schedule":
-                    case "sched":
-                    case "s":
-                        if (Tasks.getTask(taskName) instanceof Scheduler) {
-                            String[] split = value.split(" ");
-                            if (split.length != 5) {
-                                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Schedule has incorrect number of values!"));
-                                return CommandResult.empty();
-                            }
-                            for (String str : split) {
-                                if (str.equals("*")) {
-                                    break;
-                                } else if (str.length() > 1 && str.substring(0, 1).equals("/")) {
-                                    str = str.substring(1);
-                                }
-                                try {
-                                    Integer.parseInt(str);
-                                } catch (NumberFormatException ignored) {
-                                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Schedule has incorrect format!"));
-                                    return CommandResult.empty();
-                                }
-                            }
-
-                            ((Scheduler) Tasks.getTask(taskName)).setSchedule(value);
-                            Config.syncTask(Tasks.getTask(taskName));
-                            src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, taskName, " schedule set!"));
-                            return CommandResult.success();
-                        } else {
-                            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, "is not an scheduler task!"));
-                            return CommandResult.empty();
-                        }
-                    default:
-                        src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, variable, " is not valid!"));
-                        return CommandResult.empty();
-                }
-            }
-        } else {
-            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, taskName, " does not exist!"));
+        if (!Tasks.taskMap.containsKey(name)) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " does not exist!"));
             return CommandResult.empty();
         }
+        CmdCalTask ccTask = Tasks.taskMap.get(name);
+        if (Tasks.isActive(ccTask)) {
+            src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " is currently running!"));
+            return CommandResult.empty();
+        }
+        switch (variable.toLowerCase()) {
+            case "command":
+                variable = "command";
+                value = value.substring(0, 1).equals("/") ? value.substring(1) : value;
+                if (Util.checkBlacklist(value)) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Command is blacklisted!"));
+                    return CommandResult.empty();
+                }
+                ccTask.Command = value;
+                break;
+            case "description":
+                variable = "description";
+                ccTask.Description = value;
+                break;
+            case "interval":
+                variable = "interval";
+                if (!(ccTask instanceof IntervalTask)) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " is not an interval task!"));
+                    return CommandResult.empty();
+                }
+                try {
+                    int interval = Integer.parseInt(value);
+                    if (interval < 1) {
+                        src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Interval is less than 1!"));
+                        return CommandResult.empty();
+                    }
+                    ((IntervalTask) ccTask).Interval = interval;
+                } catch (NumberFormatException ignored) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Interval was not numeric!"));
+                    return CommandResult.empty();
+                }
+                break;
+            case "name":
+                variable = "name";
+                if (value.contains(" ")) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Name must not contain spaces!"));
+                    return CommandResult.empty();
+                }
+                Config.deleteTask(ccTask);
+                ccTask.Name = value;
+                break;
+            case "schedule":
+                variable = "schedule";
+                if (!(ccTask instanceof SchedulerTask)) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " is not an scheduler task!"));
+                    return CommandResult.empty();
+                }
+                if (value.length() - value.replace(" ", "").length() != 4) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Schedule has incorrect number of values!"));
+                    return CommandResult.empty();
+                }
+                if (!Util.validateSchedule(value)) {
+                    src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, "Schedule has incorrect format!"));
+                    return CommandResult.empty();
+                }
+                ((SchedulerTask) ccTask).Schedule = value;
+                break;
+            default:
+                src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, variable, " is not valid!"));
+                return CommandResult.empty();
+        }
+        Config.writeTask(ccTask);
+        src.sendMessage(Text.of(TextColors.DARK_GREEN, "CmdCal SUCCESS: ", TextColors.GREEN, name, " ", variable, " set!"));
+        return CommandResult.success();
     }
 }
