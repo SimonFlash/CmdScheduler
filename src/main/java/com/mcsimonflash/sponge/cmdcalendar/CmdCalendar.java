@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.mcsimonflash.sponge.cmdcalendar.commands.*;
 import com.mcsimonflash.sponge.cmdcalendar.managers.Config;
+import com.mcsimonflash.sponge.cmdcalendar.managers.Tasks;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -12,7 +13,8 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStoppingEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
@@ -21,7 +23,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.TreeMap;
 
-@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "mc1.10.2-v1.1.0", description = "Automatic Command Scheduler - Developed by Simon_Flash")
+@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "mc1.10.2-v1.1.1", description = "Automatic Command Scheduler - Developed by Simon_Flash")
 public class CmdCalendar {
     private static CmdCalendar plugin;
     public static CmdCalendar getPlugin() {
@@ -55,7 +57,7 @@ public class CmdCalendar {
     public void onInitilization(GameInitializationEvent event) {
         plugin = this;
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
-        getLogger().info("|     CmdCalendar - Version 1.1.0     |");
+        getLogger().info("|     CmdCalendar - Version 1.1.1     |");
         getLogger().info("|      Developed By: Simon_Flash      |");
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
         Config.readConfig();
@@ -162,11 +164,26 @@ public class CmdCalendar {
         Sponge.getCommandManager().register(this, CmdCalendar, Lists.newArrayList("cc", "CmdCal", "CmdCalendar"));
     }
 
-    public void onReload(GameReloadEvent event) {
-        Config.readConfig();
+    @Listener
+    public void onStartedServer(GameStartedServerEvent event) {
+        Config.onStartedServer();
+        if (Config.isActivateOnStartup()) {
+            Tasks.reloadTasks();
+        }
     }
 
-    public void onStopping(GameStoppingEvent event) {
+    @Listener
+    public void onReload(GameReloadEvent event) {
+        Config.onReload();
+        Config.readConfig();
+        if (Config.isActivateOnStartup()) {
+            Tasks.reloadTasks();
+        }
+    }
+
+    @Listener
+    public void onStoppingServer(GameStoppingServerEvent event) {
+        Config.onStoppingServer();
         Config.writeConfig();
     }
 }

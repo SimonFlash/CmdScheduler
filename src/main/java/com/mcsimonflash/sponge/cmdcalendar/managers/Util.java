@@ -17,9 +17,9 @@ public class Util {
     /**
      * GENERAL
      * <p>
-     * syncTask -> Updates the config with the task @ccTask
      * refreshStatus -> Validates the status of task @ccTask
      * getTaskNames -> Returns a List of all task names, sorted if @sort
+     * clearMaps -> Clears the task maps
      */
 
     public static void refreshStatus(CmdCalTask ccTask) {
@@ -41,13 +41,17 @@ public class Util {
         return taskNames;
     }
 
+    public static void clearMaps() {
+        Tasks.taskMap.clear();
+        Tasks.stopAll();
+    }
+
     /**
      * TASK MANAGEMENT
      * <p>
      * createTask -> Creates a task named @name of TaskType @type
      * startTask -> Activates the task @ccTask
      * stopTask -> Halts the task @ccTask
-     * clearMaps -> Clears the task maps
      */
 
     @Nullable
@@ -77,11 +81,6 @@ public class Util {
     public static void stopTask(CmdCalTask ccTask) {
         ccTask.Status = ccTask.Status.equals(TaskStatus.Active) ? TaskStatus.Halted : TaskStatus.Concealed_Halted;
         Tasks.stopTask(ccTask);
-    }
-
-    public static void clearMaps() {
-        Tasks.taskMap.clear();
-        Tasks.stopAll();
     }
 
     /**
@@ -126,7 +125,6 @@ public class Util {
 
     public static boolean checkBlacklist(String command) {
         String coreCommand = command.contains(" ") ? command.substring(0, command.indexOf(" ")) : command;
-        CmdCalendar.getPlugin().getLogger().info("Testing core command: " + coreCommand);
         return Config.isBlacklistCheck() && Config.getBlacklist().contains(coreCommand.toLowerCase());
     }
 
@@ -156,6 +154,8 @@ public class Util {
      * parseType -> returns the TaskType enum for String @type
      * printType -> returns the String value of TaskType @taskType
      */
+
+    //Convert to valueOf() and name()
 
     public static TaskStatus parseStatus(String status) {
         switch (status.toLowerCase()) {

@@ -26,6 +26,24 @@ public class Config {
             .setPath(CmdCalendar.getPlugin().getDefaultConfig()).build();
     private static CommentedConfigurationNode rootNode;
 
+    private static void loadConfig() {
+        try {
+            rootNode = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            CmdCalendar.getPlugin().getLogger().error("Config could not load!");
+        }
+    }
+
+    private static void saveConfig() {
+        try {
+            loader.save(rootNode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            CmdCalendar.getPlugin().getLogger().error("Config could not save!");
+        }
+    }
+
     public static void readConfig() {
         if (Files.notExists(CmdCalendar.getPlugin().getDefaultConfig())) {
             try {
@@ -63,9 +81,6 @@ public class Config {
         } else {
             loadedTasks.sort(Comparator.naturalOrder());
             CmdCalendar.getPlugin().getLogger().info("Loaded Tasks: " + String.join(", ", loadedTasks) + ".");
-            if (isActivateOnStartup()) {
-                Tasks.reloadTasks();
-            }
         }
     }
 
@@ -143,28 +158,34 @@ public class Config {
         saveConfig();
     }
 
+    public static void onStartedServer() {
+        loadConfig();
+        String startedCmd = rootNode.getNode("states", "started_server").getString("");
+        if (!startedCmd.isEmpty()) {
+            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), startedCmd);
+        }
+    }
+
+    public static void onReload() {
+        loadConfig();
+        String reloadCmd = rootNode.getNode("states", "reload").getString("");
+        if (!reloadCmd.isEmpty()) {
+            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), reloadCmd);
+        }
+    }
+
+    public static void onStoppingServer() {
+        loadConfig();
+        String stoppingCmd = rootNode.getNode("states", "stopping_server").getString("");
+        if (!stoppingCmd.isEmpty()) {
+            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), stoppingCmd);
+        }
+    }
+
     public static void deleteTask(CmdCalTask ccTask) {
         loadConfig();
         rootNode.getNode("tasks", ccTask.Name).setValue(null);
         saveConfig();
-    }
-
-    private static void loadConfig() {
-        try {
-            rootNode = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-            CmdCalendar.getPlugin().getLogger().error("Config could not load!");
-        }
-    }
-
-    private static void saveConfig() {
-        try {
-            loader.save(rootNode);
-        } catch (IOException e) {
-            e.printStackTrace();
-            CmdCalendar.getPlugin().getLogger().error("Config could not save!");
-        }
     }
 
     public static List<String> getBlacklist() {
@@ -177,7 +198,6 @@ public class Config {
             CmdCalendar.getPlugin().getLogger().error("Unable to read blacklist! Using defaults.");
             blacklist.addAll(Arrays.asList("start", "restart", "stop", "op", "cc", "cmdcal", "cmdcalendar"));
         }
-        CmdCalendar.getPlugin().getLogger().info(String.join(", ", blacklist));
         return blacklist;
     }
 
