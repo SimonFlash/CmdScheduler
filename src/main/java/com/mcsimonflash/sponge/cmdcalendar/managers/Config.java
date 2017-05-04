@@ -57,7 +57,6 @@ public class Config {
         }
         loadConfig();
         Util.clearMaps();
-        List<String> loadedTasks = Lists.newArrayList();
         Map<Object, ? extends ConfigurationNode> taskNameMap = rootNode.getNode("tasks").getChildrenMap();
         for (Map.Entry<Object, ? extends ConfigurationNode> task : taskNameMap.entrySet()) {
             String name = (String) task.getKey();
@@ -71,16 +70,7 @@ public class Config {
                 CmdCalendar.getPlugin().getLogger().error(name + " type is not valid!");
                 continue;
             }
-            CmdCalTask ccTask = Util.createTask(name, type);
-            loadTask(ccTask);
-            loadedTasks.add(ccTask.Name);
-        }
-
-        if (loadedTasks.isEmpty()) {
-            CmdCalendar.getPlugin().getLogger().info("No tasks loaded!");
-        } else {
-            loadedTasks.sort(Comparator.naturalOrder());
-            CmdCalendar.getPlugin().getLogger().info("Loaded Tasks: " + String.join(", ", loadedTasks) + ".");
+            loadTask(Util.createTask(name, type));
         }
     }
 

@@ -23,7 +23,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.TreeMap;
 
-@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "mc1.10.2-v1.1.1", description = "Automatic Command Scheduler - Developed by Simon_Flash")
+@Plugin(id = "cmdcalendar", name = "CmdCalendar", version = "mc1.10.2-v1.1.2", description = "Automatic Command Scheduler - Developed by Simon_Flash")
 public class CmdCalendar {
     private static CmdCalendar plugin;
     public static CmdCalendar getPlugin() {
@@ -57,7 +57,7 @@ public class CmdCalendar {
     public void onInitilization(GameInitializationEvent event) {
         plugin = this;
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
-        getLogger().info("|     CmdCalendar - Version 1.1.1     |");
+        getLogger().info("|     CmdCalendar - Version 1.1.2     |");
         getLogger().info("|      Developed By: Simon_Flash      |");
         getLogger().info("+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=+");
         Config.readConfig();

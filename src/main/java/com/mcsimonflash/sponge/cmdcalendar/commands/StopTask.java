@@ -14,7 +14,7 @@ import org.spongepowered.api.text.format.TextColors;
 public class StopTask implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String name = args.<String>getOne("taskName").get();
+        String name = args.<String>getOne("name").get();
 
         if (!Tasks.taskMap.containsKey(name)) {
             src.sendMessage(Text.of(TextColors.DARK_RED, "CmdCal ERROR: ", TextColors.RED, name, " does not exist!"));
