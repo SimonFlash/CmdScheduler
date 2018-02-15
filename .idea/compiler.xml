@@ -4,6 +4,8 @@
     <bytecodeTargetLevel>
       <module name="CmdCalendar_main" target="1.8" />
       <module name="CmdCalendar_test" target="1.8" />
+      <module name="CmdScheduler_main" target="1.8" />
+      <module name="CmdScheduler_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

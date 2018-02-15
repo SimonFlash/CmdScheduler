@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar_main.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar_main.iml" group="CmdCalendar" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdCalendar_test.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdCalendar_test.iml" group="CmdCalendar" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdScheduler.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdScheduler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdScheduler_main.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdScheduler_main.iml" group="CmdScheduler" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CmdScheduler_test.iml" filepath="$PROJECT_DIR$/.idea/modules/CmdScheduler_test.iml" group="CmdScheduler" />
       <module fileurl="file://$PROJECT_DIR$/src/main/main.iml" filepath="$PROJECT_DIR$/src/main/main.iml" />
     </modules>
   </component>
