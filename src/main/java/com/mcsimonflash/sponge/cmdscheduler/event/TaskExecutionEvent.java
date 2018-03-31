@@ -1,6 +1,6 @@
 package com.mcsimonflash.sponge.cmdscheduler.event;
 
-import com.mcsimonflash.sponge.cmdscheduler.task.AdvancedTask;
+import com.mcsimonflash.sponge.cmdscheduler.task.ScheduledTask;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 
@@ -8,7 +8,7 @@ public class TaskExecutionEvent extends AbstractEvent {
 
     //TODO: What the heck does this class even do?
 
-    private final AdvancedTask task;
+    private final ScheduledTask task;
     private final Cause cause;
 
     /**
@@ -19,18 +19,18 @@ public class TaskExecutionEvent extends AbstractEvent {
      * @param task the task being executed
      * @param cause the cause of the execution
      */
-    public TaskExecutionEvent(AdvancedTask task, Cause cause) {
+    public TaskExecutionEvent(ScheduledTask task, Cause cause) {
         this.task = task;
         this.cause = cause;
     }
 
     /**
-     * Returns the {@link AdvancedTask} that is being executed. Attempting to
+     * Returns the {@link ScheduledTask} that is being executed. Attempting to
      * start, stop, or force the task results in undefined behavior.
      *
      * @return the task being execution
      */
-    public AdvancedTask getTask() {
+    public ScheduledTask getTask() {
         return task;
     }
 

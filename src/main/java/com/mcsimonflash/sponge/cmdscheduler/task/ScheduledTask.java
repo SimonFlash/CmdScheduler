@@ -1,24 +1,20 @@
 package com.mcsimonflash.sponge.cmdscheduler.task;
 
 import com.google.common.base.Preconditions;
-import com.mcsimonflash.sponge.cmdscheduler.event.TaskExecutionEvent;
 import com.mcsimonflash.sponge.cmdscheduler.schedule.ClassicSchedule;
 import com.mcsimonflash.sponge.cmdscheduler.schedule.CronSchedule;
 import com.mcsimonflash.sponge.cmdscheduler.schedule.Schedule;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.Tristate;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class AdvancedTask {
+public class ScheduledTask {
 
     //TODO: Should we keep a registration of tasks?
     //TODO: Find a way for CronSchedule to run without starting/stopping
@@ -29,12 +25,12 @@ public class AdvancedTask {
     //Running tasks are submitted and have a Task object
 
     private final String name;
-    private final Consumer<AdvancedTask> executor;
+    private final Consumer<ScheduledTask> executor;
     private final Schedule schedule;
     private final Tristate async;
     private Task task;
 
-    private AdvancedTask(String name, Consumer<AdvancedTask> executor, Schedule schedule, Tristate async) {
+    private ScheduledTask(String name, Consumer<ScheduledTask> executor, Schedule schedule, Tristate async) {
         this.name = name;
         this.executor = executor;
         this.schedule = schedule;
@@ -73,7 +69,7 @@ public class AdvancedTask {
             Consumer<Task> consumer = st -> execute(container);
             switch (async) {
                 case UNDEFINED:
-                    consumer = st -> Task.builder().name("Magnetar Synchronous Wrapper: " + name).execute(t -> execute(container)).submit(container);
+                    consumer = st -> Task.builder().name("CmdTask Synchronous Wrapper: " + name).execute(t -> execute(container)).submit(container);
                 case TRUE: //Fallthrough
                     builder.async();
             }
@@ -84,7 +80,7 @@ public class AdvancedTask {
                     if (task != null) {
                         task.cancel();
                         task = null;
-                        this.start(container);
+                        Task.builder().delayTicks(0).execute(t -> this.start(container)).submit(container);
                     }
                 };
             }
@@ -113,11 +109,11 @@ public class AdvancedTask {
         try {
             //TODO: Benefit behind throwing an event?
             //TODO: Allow the event to be cancelable?
-            Sponge.getEventManager().post(new TaskExecutionEvent(this, Cause.of(EventContext.empty(), container)));
+            //Sponge.getEventManager().post(new TaskExecutionEvent(this, Cause.of(EventContext.empty(), container)));
             executor.accept(this);
             //TODO: Better method for handling exceptions
         } catch (Throwable t) {
-            container.getLogger().error("An error occurred attempting to execute an AdvancedTask for this plugin.", t);
+            container.getLogger().error("An error occurred attempting to execute a CmdTask for this plugin.", t);
         }
     }
 
@@ -131,7 +127,7 @@ public class AdvancedTask {
     /**
      * @return the task executor
      */
-    public Consumer<AdvancedTask> getExecutor() {
+    public Consumer<ScheduledTask> getExecutor() {
         return executor;
     }
 
@@ -166,11 +162,11 @@ public class AdvancedTask {
 
     @Override
     public String toString() {
-        return "MagnetarTask{name=" + name + ",schedule=" + schedule + ",async=" + async.toString().toLowerCase() + "}";
+        return "ScheduledTask{name=" + name + ",schedule=" + schedule + ",async=" + async.toString().toLowerCase() + "}";
     }
 
     /**
-     * Creates a new builder for a {@link AdvancedTask}.
+     * Creates a new builder for a {@link ScheduledTask}.
      *
      * @return the new builder
      */
@@ -178,23 +174,23 @@ public class AdvancedTask {
         return new Builder();
     }
 
-    public static class Builder implements ResettableBuilder<AdvancedTask, Builder> {
+    public static class Builder implements ResettableBuilder<ScheduledTask, Builder> {
 
         @Nullable private String name;
-        @Nullable private Consumer<AdvancedTask> executor;
+        @Nullable private Consumer<ScheduledTask> executor;
         @Nullable private Schedule schedule;
         private Tristate async = Tristate.UNDEFINED;
 
         //TODO: Include a from(Task) method?
         /**
          * Sets this builder to have the same executor, schedule, and async
-         * state as the give {@link AdvancedTask value}. The name must still be set.
+         * state as the give {@link ScheduledTask value}. The name must still be set.
          *
-         * @param value the existing MyTask
+         * @param value the existing ScheduledTask
          * @return this builder
          */
         @Override
-        public Builder from(AdvancedTask value) {
+        public Builder from(ScheduledTask value) {
             executor = value.getExecutor();
             schedule = value.getSchedule();
             async = value.getAsync();
@@ -230,29 +226,14 @@ public class AdvancedTask {
 
         /**
          * Sets the executor for this task, which consumes the resulting
-         * {@link AdvancedTask}.
+         * {@link ScheduledTask}.
          *
          * @param executor the executor to be set
          * @return this builder for chaining
          */
-        public Builder executor(Consumer<AdvancedTask> executor) {
+        public Builder executor(Consumer<ScheduledTask> executor) {
             this.executor = executor;
             return this;
-        }
-
-        //TODO: Include source argument (note: requires an online check or something)
-        //TODO: Check if the task is async?
-        /**
-         * Sets the executor for this task to process the given command as the
-         * server console.
-         *
-         * If the command starts with a "/", it will be replaced.
-         *
-         * @param command the command to be processed
-         */
-        public Builder command(String command) {
-            String copy = command.startsWith("/") ? command.substring(1) : command;
-            return executor(mt -> Sponge.getCommandManager().process(Sponge.getServer().getConsole(), copy));
         }
 
         //TODO: If no schedule is given, should this task run once and stop?
@@ -274,8 +255,8 @@ public class AdvancedTask {
          * TRUE: The task is scheduled asynchronously
          * FALSE: The task is scheduled synchronously
          * UNDEFINED: The task is schedule asynchronously, but the executor is
-         * wrapped inside a synchronous task. This ensure that the task runs in
-         * sync with the server, but increases performance by handling the
+         * wrapped inside a synchronous task. This ensures that the task runs in
+         * sync with the server, but *may increase performance by handling the
          * logistics in another thread.
          *
          * @param async the async state to be set
@@ -293,15 +274,15 @@ public class AdvancedTask {
          * Unlike the Sponge Task, building does not submit the task. It must
          * be started independently using {@link #start(PluginContainer)}.
          *
-         * @return the MyTask for this builder
+         * @return the ScheduledTask for this builder
          * @throws IllegalArgumentException if name, executor, or schedule are
          *     not defined or name is empty
          */
-        public AdvancedTask build() throws IllegalArgumentException {
+        public ScheduledTask build() throws IllegalArgumentException {
             Preconditions.checkArgument(name != null && !name.isEmpty(), "Name must be defined.");
             Preconditions.checkArgument(executor != null, "Executor must be defined.");
             Preconditions.checkArgument(schedule != null, "Schedule must be defined.");
-            return new AdvancedTask(name, executor, schedule, async);
+            return new ScheduledTask(name, executor, schedule, async);
         }
 
     }

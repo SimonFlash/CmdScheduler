@@ -1,22 +1,22 @@
 package com.mcsimonflash.sponge.cmdscheduler.command.create;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mcsimonflash.sponge.cmdcontrol.command.parser.CommandParser;
-import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.*;
-import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.arguments.Arguments;
-import com.mcsimonflash.sponge.cmdscheduler.CmdScheduler;
-import com.mcsimonflash.sponge.cmdscheduler.internal.Config;
+import com.mcsimonflash.sponge.cmdcontrol.core.CmdUtils;
+import com.mcsimonflash.sponge.cmdcontrol.teslalibs.argument.Arguments;
+import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.Aliases;
+import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.Command;
+import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.CommandService;
+import com.mcsimonflash.sponge.cmdcontrol.teslalibs.command.Permission;
 import com.mcsimonflash.sponge.cmdscheduler.schedule.ClassicSchedule;
-import com.mcsimonflash.sponge.cmdscheduler.task.AdvancedTask;
+import com.mcsimonflash.sponge.cmdscheduler.schedule.Schedule;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.Tristate;
+
+import java.util.function.Function;
 
 @Singleton
 @Aliases("classic")
@@ -25,48 +25,38 @@ public class Classic extends Command {
 
     @Inject
     private Classic(CommandService service) {
-        super(service, Settings.create().arguments(
-                Arguments.string().toElement("name"),
-                Arguments.flags()
-                        .flag("start")
-                        .flag(Arguments.tristate().toElement("async"), "async", "a")
-                        .flag(Arguments.duration().toElement("delay"), "delay", "d")
-                        .flag(Arguments.duration().toElement("inverval"), "interval", "i")
-                        .flag(Arguments.integer().inRange(Range.atLeast(0)).toElement("delay-ticks"), "delay-ticks", "dt")
-                        .flag(Arguments.integer().inRange(Range.atLeast(0)).toElement("interval-ticks"), "interval-ticks", "it")
-                        .build(),
-                new CommandParser(ImmutableMap.of()).toElement("command")
-        ));
+        super(service, settings()
+                .arguments(
+                        Arguments.string().toElement("name"),
+                        Arguments.flags()
+                                .flag("start")
+                                .flag(Arguments.tristate().toElement("async"), "async", "a")
+                                .flag(Arguments.duration().toElement("delay"), "delay", "d")
+                                .flag(Arguments.duration().toElement("interval"), "interval", "i")
+                                .flag(Arguments.intObj().inRange(Range.atLeast(0)).toElement("delay-ticks"), "delay-ticks", "dt")
+                                .flag(Arguments.intObj().inRange(Range.atLeast(0)).toElement("interval-ticks"), "interval-ticks", "it")
+                                .build(),
+                        Arguments.command().toElement("command"))
+                .usage(CmdUtils.usage("/cmdscheduler create classic ", CmdUtils.info("Classic", "Creates a new task with a classic schedule.\n", "", "classic\n", "cmdscheduler.command.create.classic.base"), Create.NAME_ARG,
+                        CmdUtils.arg(false, "-delay", CmdUtils.info("Delay", "The delay of this task.\n", "Duration (in the form #d#h#m#s#ms)\n", "-delay, -d", "")),
+                        CmdUtils.arg(false, "-interval", CmdUtils.info("Interval", "The interval of this task.\n", "Duration (in the form #d#h#m#s#ms)\n", "-interval, -i", "")),
+                        CmdUtils.arg(false, "-delay-ticks", CmdUtils.info("DelayTicks", "The delay of this task in ticks.\n", "Integer (at least 0)\n", "-delay-ticks, -dt", "")),
+                        CmdUtils.arg(false, "-interval-ticks", CmdUtils.info("IntervalTicks", "The interval of this task in ticks.\n", "Integer (at least 0)\n", "-interval-ticks, -it", "")),
+                        Create.ASYNC_FLAG, Create.START_FLAG, Create.COMMAND_ARG)));
     }
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String name = args.<String>getOne("name").get();
-        if (Config.tasks.containsKey(name)) {
-            throw new CommandException(Text.of("A task already exists with name " + name + "."));
-        }
-        try {
-            ClassicSchedule.Builder builder = ClassicSchedule.builder();
-            args.<Integer>getOne("delay").ifPresent(builder::delay);
-            args.<Integer>getOne("interval").ifPresent(builder::interval);
-            args.<Integer>getOne("delay-ticks").ifPresent(builder::delayTicks);
-            args.<Integer>getOne("interval-ticks").ifPresent(builder::intervalTicks);
-            AdvancedTask task = AdvancedTask.builder()
-                    .name(name)
-                    .command(args.<String>getOne("command").get())
-                    .schedule(builder.build())
-                    .async(args.<Tristate>getOne("async").orElse(Tristate.UNDEFINED))
-                    .build();
-            Config.tasks.put(task.getName().toLowerCase(), task);
-            src.sendMessage(Text.of("Successfully created task " + task.getName() + "."));
-            if (args.hasAny("start")) {
-                task.start(CmdScheduler.get().Container);
-                src.sendMessage(Text.of("Task " + task.getName() + " has been started."));
-            }
-            return CommandResult.success();
-        } catch (IllegalArgumentException e) {
-            throw new CommandException(Text.of(e.getMessage()));
-        }
+        return Create.create(src, args, FUNCTION);
     }
+
+    private static final Function<CommandContext, Schedule> FUNCTION = args -> {
+        ClassicSchedule.Builder builder = ClassicSchedule.builder();
+        args.<Integer>getOne("delay").ifPresent(builder::delay);
+        args.<Integer>getOne("interval").ifPresent(builder::interval);
+        args.<Integer>getOne("delay-ticks").ifPresent(builder::delayTicks);
+        args.<Integer>getOne("interval-ticks").ifPresent(builder::intervalTicks);
+        return builder.build();
+    };
 
 }
