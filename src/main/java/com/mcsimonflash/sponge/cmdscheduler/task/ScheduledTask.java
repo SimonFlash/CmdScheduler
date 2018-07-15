@@ -162,7 +162,7 @@ public class ScheduledTask {
 
     @Override
     public String toString() {
-        return "ScheduledTask{name=" + name + ",schedule=" + schedule + ",async=" + async.toString().toLowerCase() + "}";
+        return "ScheduledTask{name=" + name + ",schedule=" + schedule + ",async=" + async.toString().toLowerCase() + ", active=" + isActive() + "}";
     }
 
     /**

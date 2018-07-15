@@ -4,22 +4,24 @@ import com.mcsimonflash.sponge.cmdscheduler.schedule.Schedule;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.util.Tristate;
 
+import java.util.List;
+
 public class CommandTask {
 
     private final String name;
-    private String command;
+    private List<String> commands;
     private Schedule schedule;
     private Tristate async;
     private ScheduledTask task;
 
-    public CommandTask(String name, String command, Schedule schedule, Tristate async) {
+    public CommandTask(String name, List<String> commands, Schedule schedule, Tristate async) {
         this.name = name;
-        this.command = command;
+        this.commands = commands;
         this.schedule = schedule;
         this.async = async;
         task = ScheduledTask.builder()
                 .name(name)
-                .executor(t -> Sponge.getCommandManager().process(Sponge.getServer().getConsole(), command))
+                .executor(t -> commands.forEach(c -> Sponge.getCommandManager().process(Sponge.getServer().getConsole(), c)))
                 .schedule(schedule)
                 .async(async)
                 .build();
@@ -33,10 +35,10 @@ public class CommandTask {
     }
 
     /**
-     * @return the command of the task
+     * @return the commands of the task
      */
-    public String getCommand() {
-        return command;
+    public List<String> getCommands() {
+        return commands;
     }
 
     /**

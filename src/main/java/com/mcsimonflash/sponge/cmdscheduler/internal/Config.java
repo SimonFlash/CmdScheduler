@@ -14,7 +14,9 @@ import org.spongepowered.api.util.Tristate;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Config {
 
@@ -43,10 +45,16 @@ public class Config {
     public static void loadTask(ConfigurationNode node) {
         try {
             String name = (String) node.getKey();
-            String command = node.getNode("command").getString("");
+            List<String> commands = node.getNode("commands").getChildrenList().stream()
+                    .map(n -> n.getString("").startsWith("/") ? n.getString("").substring(1) : n.getString(""))
+                    .collect(Collectors.toList());
+            NodeUtils.ifAttached(node.getNode("command"), n -> {
+                CmdScheduler.get().getLogger().warn("Task " + name + " has a command node defined, use the commands list instead (v1.1.1)");
+                commands.add(n.getString("").startsWith("/") ? n.getString("").substring(1) : n.getString(""));
+            });
             Schedule schedule = getSchedule(node.getNode("schedule"));
             Tristate async = node.getNode("async").isVirtual() ? Tristate.UNDEFINED : Tristate.fromBoolean(node.getNode("async").getBoolean(false));
-            tasks.put(name.toLowerCase(), new CommandTask(name, command.startsWith("/") ? command.substring(1) : command, schedule, async));
+            tasks.put(name.toLowerCase(), new CommandTask(name, commands, schedule, async));
         } catch (IllegalArgumentException e) {
             CmdScheduler.get().getLogger().error(e.getMessage());
         }
